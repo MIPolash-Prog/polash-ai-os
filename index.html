@@ -274,15 +274,15 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
       deferred.userChoice.then(function(){ deferred = null; btn.style.display='none'; });
     } else {
       // iOS / other browsers: manual instruction
-      alert('অ্যাপ ইনস্টল করতে: ব্রাউজারের মেনু (⋮) থেকে "Add to Home screen" / "Install app" চাপুন 📲');
+      alert('অ্যাপ ইনস্টল করতে:\n• ল্যাপটপ (Chrome/Edge): ঠিকানা বারের ডান দিকের ইনস্টল আইকন (🖥️⬇️) ক্লিক করুন, অথবা মেনু (⋮) → "Install Polash AI OS"\n• ফোন: মেনু (⋮) → "Add to Home screen" / "Install app" 📲');
     }
   });
   window.addEventListener('appinstalled', function(){ btn.style.display='none'; });
   if (document.body) document.body.appendChild(btn);
   else document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(btn); });
-  // On iOS Safari there is no beforeinstallprompt — show hint button there
-  var ua = navigator.userAgent || '';
-  if (/iphone|ipad|ipod/i.test(ua) && !isStandalone()) btn.style.display='block';
+  // Show the button always (unless already installed): if Chrome's native
+  // prompt is ready it installs directly, otherwise it shows instructions.
+  if (!isStandalone()) setTimeout(showBtn, 1800);
 })();
 </script>
 </body>
