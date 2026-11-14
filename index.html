@@ -28,6 +28,20 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
+<style id="float-dock-fix">
+/* Floating dock fix: every floating button gets its own separate slot (no overlap)
+   LEFT dock (bottom -> top): Voice mic -> keyboard -> App Install
+   RIGHT dock: Quick-action FAB alone */
+#voiceFab{left:24px!important;bottom:24px!important}
+#voiceTypeBtn{left:34px!important;bottom:94px!important}
+#pwaInstallBtn{right:auto!important;left:24px!important;bottom:146px!important}
+@media (max-width:901px){
+  /* raise the whole left dock above the mobile bottom-nav */
+  #voiceFab{left:16px!important;bottom:88px!important}
+  #voiceTypeBtn{left:26px!important;bottom:158px!important}
+  #pwaInstallBtn{left:16px!important;bottom:210px!important}
+}
+</style>
 </head>
 <body>
 <a class="skip-link" href="#view">Skip to content</a>
