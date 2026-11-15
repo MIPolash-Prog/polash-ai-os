@@ -229,7 +229,9 @@ function submitTyped(){var i=$("#voiceInput");if(!i)return;var v=i.value;if(v.tr
 function startRecNow(){try{rec.start()}catch(e){listening=false;toast("ভয়েস শুরু হয়নি — আবার 🎤 চাপুন, না হলে ⌨️ লিখে দিন");openTypeBar()}}
 function tryRec(){
  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SR){toast("এই ব্রাউজারে সরাসরি ভয়েস সাপোর্ট নেই — ⌨️ লিখে কমান্ড দিন (Chrome-এ পুরো ভয়েস চলবে)");openTypeBar();return}
+ if(!SR){
+  if(window.AndroidVoice&&window.AndroidVoice.start){toast("🎤 মাইক চালু করছি... বলুন!");try{window.AndroidVoice.start()}catch(e){openTypeBar()}return}
+  toast("এই ব্রাউজারে সরাসরি ভয়েস সাপোর্ট নেই — ⌨️ লিখে কমান্ড দিন (Chrome-এ পুরো ভয়েস চলবে)");openTypeBar();return}
  if(listening){try{rec.stop()}catch(e){}return}
  if(window.isSecureContext===false&&location.protocol==="http:"&&!/localhost|127\.0\.0\.1/.test(location.hostname)){toast("ভয়েসের জন্য HTTPS সাইট লাগবে — লাইভ সাইটে খুলুন: mipolash-prog.github.io/polash-ai-os");openTypeBar();return}
  toast("🎤 মাইক চালু করছি... অনুমতি চাইলে Allow দিন");
@@ -272,7 +274,9 @@ function init(){
  document.body.appendChild(bar);
  $("#voiceGo").addEventListener("click",submitTyped);
  $("#voiceInput").addEventListener("keydown",function(e){if(e.key==="Enter")submitTyped();if(e.key==="Escape")closeTypeBar()});
- window.VoiceOS={handle:handleCommand,start:tryRec,type:openTypeBar}}
+ window.VoiceOS={handle:handleCommand,start:tryRec,type:openTypeBar,
+ onNativeResult:function(txt){if(txt){failCount=0;toast("আপনি বললেন: "+txt);handleCommand(txt)}},
+ onNativeError:function(msg){toast(msg||"শুনতে পাইনি — আবার 🎤 চেপে বলুন");if(/permission|অনুমতি/i.test(msg||""))setTimeout(openTypeBar,600)}}}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
 </script>
