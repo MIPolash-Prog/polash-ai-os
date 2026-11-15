@@ -245,7 +245,7 @@ function tryRec(){
    if(finalTxt){failCount=0;langIdx=0;toast("আপনি বললেন: "+finalTxt);handleCommand(finalTxt)}};
   rec.onerror=function(ev){
    listening=false;var f=$("#voiceFab");if(f)f.classList.remove("live");
-   if((ev.error==="language-not-supported"||ev.error==="service-not-allowed")&&langIdx<LANGS.length-1){langIdx++;toast(ERRMSG[ev.error]||ev.error);setTimeout(doStart,350);return}
+   if((ev.error==="language-not-supported"||ev.error==="service-not-allowed"||ev.error==="network")&&langIdx<LANGS.length-1){langIdx++;toast(ev.error==="network"?("বাংলা ভয়েস সার্ভিসে যাওয়া যাচ্ছে না — English ("+LANGS[langIdx]+") দিয়ে চেষ্টা করছি..."):(ERRMSG[ev.error]||ev.error));setTimeout(doStart,350);return}
    failCount++;
    if(ev.error==="service-not-allowed"&&window.self!==window.top){toast("প্রিভিউ ফ্রেমে ভয়েস ব্লক থাকে — লাইভ সাইটে খুলুন: mipolash-prog.github.io/polash-ai-os, অথবা ⌨️ লিখে দিন");setTimeout(openTypeBar,600);return}
    toast(ERRMSG[ev.error]||("Voice error: "+ev.error));
