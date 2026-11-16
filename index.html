@@ -220,6 +220,9 @@ function handleCommand(raw){
  for(var p=0;p<PAGES_MAP.length;p++){var route=PAGES_MAP[p][0],words=PAGES_MAP[p][1];
    for(var w=0;w<words.length;w++){if(t.indexOf(words[w])>=0){go(route);speak(route==="home"?"Home khulchi":("Khulchi: "+route));return true}}}
  openTab("https://www.google.com/search?q="+encodeURIComponent(original));speak("Web-e khujchi: "+original);return true}
+var KNOWN_WORDS=["whatsapp","হোয়াটসঅ্যাপ","youtube","ইউটিউব","ভিডিও","video","gpt","assistant","search","খোঁজ","find","time","সময়","date","তারিখ","light","dark","লাইট","ডার্ক"];
+PAGES_MAP.forEach(function(p){p[1].forEach(function(w){KNOWN_WORDS.push(w)})});
+function commandScore(raw){var t=bnDigits((raw||"").toLowerCase());var sc=0;for(var i=0;i<KNOWN_WORDS.length;i++){if(KNOWN_WORDS[i]&&t.indexOf(KNOWN_WORDS[i])>=0)sc++}return sc}
 var rec=null,listening=false,langIdx=0,failCount=0;
 var LANGS=["bn-BD","en-US","en-IN"];
 var ERRMSG={"not-allowed":"মাইকের permission লাগবে — ব্রাউজারের 🔒 আইকনে চাপ দিয়ে Microphone Allow করুন","service-not-allowed":"এই অ্যাপ/ফ্রেমে ভয়েস সার্ভিস ব্লক — ⌨️ বোতামে লিখে কমান্ড দিন, অথবা ফাইলটা Chrome-এ খুলুন","language-not-supported":"এই ভাষা সাপোর্ট নেই — English-এ চেষ্টা করছি...","audio-capture":"মাইক পাওয়া যাচ্ছে না — অন্য অ্যাপ মাইক ধরে আছে কি না দেখুন","no-speech":"শুনতে পাইনি — আবার বলুন, একটু জোরে ও পরিষ্কার করে","network":"নেটওয়ার্ক লাগবে কণ্ঠ চিনতে — ইন্টারনেট অন করুন","aborted":"বন্ধ হয়ে গেছে — আবার 🎤 চাপুন"};
@@ -239,10 +242,22 @@ function tryRec(){
   rec=new SR();rec.lang=LANGS[langIdx];rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=3;
   rec.onstart=function(){listening=true;var f=$("#voiceFab");if(f)f.classList.add("live");toast("🎤 শুনছি ("+LANGS[langIdx]+")... বলুন! যেমন: YouTube খোলো / WhatsApp চালাও")};
   rec.onresult=function(ev){
-   var finalTxt="",interimTxt="";
-   for(var i=ev.resultIndex;i<ev.results.length;i++){var r=ev.results[i];if(r.isFinal)finalTxt+=r[0].transcript;else interimTxt+=r[0].transcript}
+   var alts=[],interimTxt="";
+   for(var i=ev.resultIndex;i<ev.results.length;i++){var r=ev.results[i];
+    if(r.isFinal){for(var a=0;a<r.length;a++){if(r[a]&&r[a].transcript)alts.push(r[a].transcript)}}
+    else if(r[0])interimTxt+=r[0].transcript}
    if(interimTxt)toast("🎧 শুনছি: "+interimTxt);
-   if(finalTxt){failCount=0;langIdx=0;toast("আপনি বললেন: "+finalTxt);handleCommand(finalTxt)}};
+   if(alts.length){
+    var best=alts[0],bestScore=commandScore(alts[0]);
+    for(var k=1;k<alts.length;k++){var sc=commandScore(alts[k]);if(sc>bestScore){bestScore=sc;best=alts[k]}}
+    toast("আপনি বললেন: "+best);
+    if(bestScore>0){failCount=0;langIdx=0;handleCommand(best)}
+    else{
+     speak("দুঃখিত, কমান্ডটা বুঝতে পারিনি: "+best);
+     var inp=$("#voiceInput");if(inp)inp.value=best;
+     setTimeout(openTypeBar,900);
+     toast("⌨️ লেখাটা ঠিক করে চালাও চাপুন — অথবা আবার 🎤 চেপে পরিষ্কার করে বলুন: যেমন 'tools kholo'");
+    }}};
   rec.onerror=function(ev){
    listening=false;var f=$("#voiceFab");if(f)f.classList.remove("live");
    if((ev.error==="language-not-supported"||ev.error==="service-not-allowed"||ev.error==="network")&&langIdx<LANGS.length-1){langIdx++;toast(ev.error==="network"?("বাংলা ভয়েস সার্ভিসে যাওয়া যাচ্ছে না — English ("+LANGS[langIdx]+") দিয়ে চেষ্টা করছি..."):(ERRMSG[ev.error]||ev.error));setTimeout(doStart,350);return}
@@ -275,7 +290,7 @@ function init(){
  $("#voiceGo").addEventListener("click",submitTyped);
  $("#voiceInput").addEventListener("keydown",function(e){if(e.key==="Enter")submitTyped();if(e.key==="Escape")closeTypeBar()});
  window.VoiceOS={handle:handleCommand,start:tryRec,type:openTypeBar,
- onNativeResult:function(txt){if(txt){failCount=0;toast("আপনি বললেন: "+txt);handleCommand(txt)}},
+ onNativeResult:function(txt){if(txt){toast("আপনি বললেন: "+txt);if(commandScore(txt)>0){failCount=0;handleCommand(txt)}else{speak("দুঃখিত, কমান্ডটা বুঝতে পারিনি: "+txt);var inp=$("#voiceInput");if(inp)inp.value=txt;setTimeout(openTypeBar,900)}}},
  onNativeError:function(msg){toast(msg||"শুনতে পাইনি — আবার 🎤 চেপে বলুন");if(/permission|অনুমতি/i.test(msg||""))setTimeout(openTypeBar,600)}}}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
