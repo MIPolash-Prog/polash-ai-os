@@ -2,22 +2,135 @@
   "updated": "2026-10-31",
   "note": "Free tiers change often — visit the official site for the latest limits.",
   "tools": [
-    { "n": "ChatGPT", "cat": "general", "free": "Free chat, images & voice (capped)", "best": "সব কাজের অলরাউন্ডার", "url": "https://chatgpt.com" },
-    { "n": "Claude", "cat": "general", "free": "Free messages (rolling limit)", "best": "লেখা, বড় ডকুমেন্ট, বিশ্লেষণ", "url": "https://claude.ai" },
-    { "n": "Google Gemini", "cat": "general", "free": "Flash model — very generous", "best": "দৈনিক ব্যবহার, Gmail/Docs", "url": "https://gemini.google.com" },
-    { "n": "DeepSeek", "cat": "general", "free": "Free, no hard cap", "best": "কোড, গণিত, যুক্তি", "url": "https://chat.deepseek.com" },
-    { "n": "Microsoft Copilot", "cat": "general", "free": "Free with Microsoft account", "best": "Windows/Edge, ওয়েব সার্চ", "url": "https://copilot.microsoft.com" },
-    { "n": "Meta AI", "cat": "general", "free": "Free in WhatsApp/Instagram/Facebook", "best": "ক্যাজুয়াল চ্যাট, ছবি", "url": "https://www.meta.ai" },
-    { "n": "Grok", "cat": "general", "free": "Limited free messages", "best": "রিয়েল-টাইম X (Twitter) তথ্য", "url": "https://grok.com" },
-    { "n": "Perplexity", "cat": "research", "free": "Free searches, limited Pro/day", "best": "সোর্সসহ রিসার্চ ও ফ্যাক্ট-চেক", "url": "https://www.perplexity.ai" },
-    { "n": "OpenCode", "cat": "agent", "free": "Open source + free Zen models", "best": "টার্মিনাল কোডিং এজেন্ট (সেরা ফ্রি)", "url": "https://opencode.ai" },
-    { "n": "Google Antigravity", "cat": "agent", "free": "Free Individual plan (weekly limits)", "best": "Google-র এজেন্ট IDE", "url": "https://antigravity.google" },
-    { "n": "Kilo Code", "cat": "agent", "free": "Free models, no card needed", "best": "VS Code কোডিং এজেন্ট", "url": "https://kilocode.ai" },
-    { "n": "Cline", "cat": "agent", "free": "Open source (own API key)", "best": "VS Code অটোনোমাস এজেন্ট", "url": "https://Cline.bot" },
-    { "n": "Aider", "cat": "agent", "free": "Open source (own API key/local)", "best": "CLI কোডিং, Git-বান্ধব", "url": "https://aider.chat" },
-    { "n": "Continue", "cat": "agent", "free": "Open source", "best": "VS Code/JetBrains, লোকাল মডেল", "url": "https://www.continue.dev" },
-    { "n": "Cursor", "cat": "agent", "free": "Hobby plan (limited agent)", "best": "AI-নেটিভ কোড এডিটর", "url": "https://cursor.com" },
-    { "n": "GitHub Copilot", "cat": "agent", "free": "2,000 completions + 50 chat/mo", "best": "GitHub ইকোসিস্টেম", "url": "https://github.com/features/copilot" },
-    { "n": "Muse", "cat": "agent", "free": "Included in ChatGPT plans (limited)", "best": "OpenAI-র কোডিং এজেন্ট", "url": "https://github.com/openai/codex" }
+    {
+      "n": "ChatGPT",
+      "cat": "general",
+      "free": "Free chat, images & voice (capped)",
+      "best": "সব কাজের অলরাউন্ডার",
+      "url": "https://chatgpt.com",
+      "d": "2026-এর আগস্ট থেকে টেক্সট চ্যাটে ক্যাপ নেই; ছবি+ভয়েস (সীমিত)"
+    },
+    {
+      "n": "Claude",
+      "cat": "general",
+      "free": "Free messages (rolling limit)",
+      "best": "লেখা, বড় ডকুমেন্ট, বিশ্লেষণ",
+      "url": "https://claude.ai",
+      "d": "পরিষ্কার লেখা, বড় ডকুমেন্ট; ~15–40 মেসেজ/উইন্ডো ক্যাপ"
+    },
+    {
+      "n": "Google Gemini",
+      "cat": "general",
+      "free": "Flash model — very generous",
+      "best": "দৈনিক ব্যবহার, Gmail/Docs",
+      "url": "https://gemini.google.com",
+      "d": "Flash মডেল প্রায় আনলিমিটেড"
+    },
+    {
+      "n": "DeepSeek",
+      "cat": "general",
+      "free": "Free, no hard cap",
+      "best": "কোড, গণিত, যুক্তি",
+      "url": "https://chat.deepseek.com",
+      "d": "অ্যাকাউন্ট ছাড়াই, হার্ড ক্যাপ নেই"
+    },
+    {
+      "n": "Microsoft Copilot",
+      "cat": "general",
+      "free": "Free with Microsoft account",
+      "best": "Windows/Edge, ওয়েব সার্চ",
+      "url": "https://copilot.microsoft.com"
+    },
+    {
+      "n": "Meta AI",
+      "cat": "general",
+      "free": "Free in WhatsApp/Instagram/Facebook",
+      "best": "ক্যাজুয়াল চ্যাট, ছবি",
+      "url": "https://www.meta.ai"
+    },
+    {
+      "n": "Grok",
+      "cat": "general",
+      "free": "Limited free messages",
+      "best": "রিয়েল-টাইম X (Twitter) তথ্য",
+      "url": "https://grok.com"
+    },
+    {
+      "n": "Perplexity",
+      "cat": "research",
+      "free": "Free searches, limited Pro/day",
+      "best": "সোর্সসহ রিসার্চ ও ফ্যাক্ট-চেক",
+      "url": "https://www.perplexity.ai",
+      "d": "সোর্স-সহ রিসার্চ"
+    },
+    {
+      "n": "OpenCode",
+      "cat": "agent",
+      "free": "Open source + free Zen models",
+      "best": "টার্মিনাল কোডিং এজেন্ট (সেরা ফ্রি)",
+      "url": "https://opencode.ai",
+      "d": "ফ্রি Zen মডেলসহ ওপেন-সোর্স — বর্তমানে সেরা ফ্রি অলরাউন্ড এজেন্ট"
+    },
+    {
+      "n": "Google Antigravity",
+      "cat": "agent",
+      "free": "Free Individual plan (weekly limits)",
+      "best": "Google-র এজেন্ট IDE",
+      "url": "https://antigravity.google",
+      "d": "ফ্রি Individual প্ল্যান (সাপ্তাহিক লিমিট) — Gemini CLI-র ফ্রি টিয়ার 2026-এর জুনে বন্ধ, এটাই Google-র পথ"
+    },
+    {
+      "n": "Kilo Code",
+      "cat": "agent",
+      "free": "Free models, no card needed",
+      "best": "VS Code কোডিং এজেন্ট",
+      "url": "https://kilocode.ai",
+      "d": "কার্ড ছাড়াই ফ্রি মডেল — VS Code-এ শুরু করা সহজ"
+    },
+    {
+      "n": "Cline",
+      "cat": "agent",
+      "free": "Open source (own API key)",
+      "best": "VS Code অটোনোমাস এজেন্ট",
+      "url": "https://Cline.bot",
+      "d": "ওপেন-সোর্স, নিজের API key লাগে — সবচেয়ে পরীক্ষিত ইন-এডিটর এজেন্ট"
+    },
+    {
+      "n": "Aider",
+      "cat": "agent",
+      "free": "Open source (own API key/local)",
+      "best": "CLI কোডিং, Git-বান্ধব",
+      "url": "https://aider.chat"
+    },
+    {
+      "n": "Continue",
+      "cat": "agent",
+      "free": "Open source",
+      "best": "VS Code/JetBrains, লোকাল মডেল",
+      "url": "https://www.continue.dev"
+    },
+    {
+      "n": "Cursor",
+      "cat": "agent",
+      "free": "Hobby plan (limited agent)",
+      "best": "AI-নেটিভ কোড এডিটর",
+      "url": "https://cursor.com",
+      "d": "Hobby প্ল্যানে সীমিত ফ্রি Agent request — AI-এডিটর অভিজ্ঞতা"
+    },
+    {
+      "n": "GitHub Copilot",
+      "cat": "agent",
+      "free": "2,000 completions + 50 chat/mo",
+      "best": "GitHub ইকোসিস্টেম",
+      "url": "https://github.com/features/copilot",
+      "d": "মাসে 2,000 completion + 50 chat — GitHub ব্যবহারকারীদের জন্য"
+    },
+    {
+      "n": "Muse",
+      "cat": "agent",
+      "free": "Included in ChatGPT plans (limited)",
+      "best": "OpenAI-র কোডিং এজেন্ট",
+      "url": "https://github.com/openai/codex"
+    }
   ]
 }
