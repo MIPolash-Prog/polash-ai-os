@@ -54,6 +54,29 @@
   .top-search span[data-icon-btn]{display:grid!important;place-items:center}
 }
 </style>
+<style id="all-device-visibility">
+/* All-device visibility: no element disappears on any screen size.
+   Where space is tight, areas scroll sideways instead of hiding content. */
+@media (max-width:900px){
+  .hero-orb{display:block!important;width:104px;opacity:.55}
+  .hero-deco{display:block!important;width:150px;height:150px;top:-10px;right:6px;opacity:.6}
+  .hv-chip{display:inline-flex!important;font-size:10px;padding:6px 10px}
+}
+@media (max-width:720px){
+  .pv-url{display:block!important;white-space:normal;word-break:break-all}
+  table.table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+@media (max-width:640px){
+  .topbar{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .topbar::-webkit-scrollbar{display:none}
+  .topbar>*{flex:none}
+  .page-title{font-size:13.5px}
+  .page-title small{font-size:9px}
+  .icon-btn{width:36px;height:36px;border-radius:10px}
+  .avatar{width:36px;height:36px;border-radius:11px}
+  .top-search{flex:0 0 42px!important;max-width:42px;padding:0;justify-content:center}
+}
+</style>
 </head>
 <body>
 <a class="skip-link" href="#view">Skip to content</a>
