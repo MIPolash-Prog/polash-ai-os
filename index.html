@@ -2716,7 +2716,26 @@
             display: none;
             flex-direction: column;
             gap: 6px;
-            align-items: flex-end
+            align-items: flex-end;
+            max-height: calc(100vh - 118px);
+            overflow-y: auto;
+            padding-right: 4px;
+            scrollbar-width: thin
+        }
+
+        .install-steps {
+            padding-left: 20px;
+            margin: 8px 0 0;
+            display: grid;
+            gap: 7px;
+            font-size: 12.5px;
+            color: var(--text-2);
+            line-height: 1.65
+        }
+
+        .install-steps li::marker {
+            color: var(--primary);
+            font-weight: 800
         }
 
         .fab-wrap.open .fab-menu {
@@ -4441,6 +4460,8 @@
             <button class="fab-item" onclick="closeFab();go('portfolio')"><span class="fabi" style="background:var(--info-soft);color:var(--info)"></span>Generate Portfolio</button>
             <button class="fab-item" onclick="closeFab();openPromptGen()"><span class="fabi" style="background:var(--danger-soft);color:var(--danger)"></span>Generate Prompt</button>
             <button class="fab-item" onclick="closeFab();shareSite()"><span class="fabi" style="background:var(--info-soft);color:var(--info)"></span>Share this site</button>
+            <button class="fab-item" onclick="closeFab();openChromeExt()"><span class="fabi" style="background:var(--accent-soft);color:var(--accent)"></span>Chrome Extension</button>
+            <button class="fab-item" onclick="closeFab();openInstallApp()"><span class="fabi" style="background:var(--ok-soft);color:var(--ok)"></span>Install App (PWA)</button>
             <button class="fab-item" onclick="closeFab();scrollToTop()"><span class="fabi" style="background:var(--primary-soft);color:var(--primary)"></span>Back to top</button>
         </div>
         <button class="fab" onclick="toggleFab()" aria-label="Quick actions menu" data-icon-btn="bolt"></button>
@@ -9624,6 +9645,8 @@
                     '<div class="card setting-card"><h3>App &amp; offline</h3><p>Install Polash AI OS for one-tap access and offline use.</p>' +
                     '<div class="setting-row"><div class="sr-main"><b>Connection</b><small id="netLabel"><span class="net-dot ' + (online ? "" : "off") + '"></span>' + (online ? "Online — live data available" : "Offline — using saved data") + '</small></div><span class="badge ' + (online ? "badge-green" : "badge-danger") + '" id="netBadge">' + (online ? "Online" : "Offline") + '</span></div>' +
                     '<div class="setting-row"><div class="sr-main"><b>Install as an app</b><small>Add to your home screen or desktop</small></div><button class="btn btn-accent btn-sm" onclick="paosInstall()">' + icon("dl", 14) + ' Install</button></div>' +
+                    '<div class="setting-row"><div class="sr-main"><b>Chrome extension</b><small>Quick access from any tab — download and load unpacked</small></div><button class="btn btn-ghost btn-sm" onclick="openChromeExt()">' + icon("ext", 14) + ' Get</button></div>' +
+                    '<div class="setting-row"><div class="sr-main"><b>Play Store app</b><small>Not published yet — install the PWA now</small></div><button class="btn btn-ghost btn-sm" onclick="openInstallApp()">' + icon("globe", 14) + ' Options</button></div>' +
                     '<div class="setting-row"><div class="sr-main"><b>App version</b><small>Polash AI OS v2.1 · PWA ready</small></div><button class="btn btn-ghost btn-sm" onclick="paosCheckUpdate()">' + icon("bolt", 14) + ' Check updates</button></div>' +
                     '<div class="setting-row"><div class="sr-main"><b>Offline cache</b><small>Clear cached files and force a fresh download</small></div><button class="btn btn-ghost btn-sm" onclick="paosClearCache()">' + icon("trash", 14) + ' Clear</button></div>' +
                     '<div class="setting-row"><div class="sr-main"><b>Share</b><small>Send this OS to a friend or client</small></div><button class="btn btn-ghost btn-sm" onclick="shareSite()">' + icon("ext", 14) + ' Share</button></div>' +
@@ -9893,6 +9916,20 @@
                 fn: function() {
                     closeModal();
                     shareSite()
+                }
+            }, {
+                t: "Get Chrome extension",
+                k: "Apps",
+                fn: function() {
+                    closeModal();
+                    openChromeExt()
+                }
+            }, {
+                t: "Install app (PWA / Play Store)",
+                k: "Apps",
+                fn: function() {
+                    closeModal();
+                    openInstallApp()
                 }
             }];
             let paletteSel = 0;
@@ -10168,6 +10205,41 @@
                 ].map(function(r) {
                     return '<tr><td style="width:170px"><span class="kbd">' + esc(r[0]) + "</span></td><td>" + esc(r[1]) + "</td></tr>"
                 }).join("") + "</tbody></table>")
+            };
+            window.openChromeExt = function() {
+                openModal("Chrome Extension — Polash AI OS",
+                    '<div class="label">One-click access from any tab</div>' +
+                    '<p style="font-size:12.5px;color:var(--text-2);line-height:1.7;margin-top:8px">The Polash AI OS extension puts your dashboard, 500+ AI tools, Insights, workspace and contact one click away in Chrome, Edge, Brave or Opera.</p>' +
+                    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0">' +
+                    '<a class="btn btn-primary btn-sm" href="downloads/polash-ai-os-chrome-extension.zip" download>' + icon("dl", 14) + ' Download extension (.zip)</a>' +
+                    '<a class="btn btn-ghost btn-sm" href="https://github.com/MIPolash-Prog/polash-ai-os/tree/main/chrome-extension" target="_blank" rel="noopener">' + icon("ext", 14) + ' View source</a>' +
+                    '</div>' +
+                    '<div class="divider"></div>' +
+                    '<div class="label">Install in 4 steps</div>' +
+                    '<ol class="install-steps">' +
+                    '<li>Download the .zip file and extract it to a folder.</li>' +
+                    '<li>Open <span class="kbd">chrome://extensions</span> in Chrome (or <span class="kbd">edge://extensions</span>).</li>' +
+                    '<li>Turn on <b>Developer mode</b> in the top-right corner.</li>' +
+                    '<li>Click <b>Load unpacked</b> and select the extracted <b>chrome-extension</b> folder.</li>' +
+                    '</ol>' +
+                    '<p style="font-size:11.5px;color:var(--text-3);margin-top:12px">Chrome Web Store listing is coming soon. Until then, load it locally with the steps above — it stays on your device.</p>',
+                    true,
+                    '<button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button><a class="btn btn-accent btn-sm" href="downloads/polash-ai-os-chrome-extension.zip" download>' + icon("dl", 14) + ' Download</a>')
+            };
+            window.openInstallApp = function() {
+                const standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+                openModal("Install Polash AI OS",
+                    '<div class="label">' + (standalone ? "App is already installed" : "Install on phone or desktop") + '</div>' +
+                    '<p style="font-size:12.5px;color:var(--text-2);line-height:1.7;margin-top:8px">Polash AI OS is a Progressive Web App. It installs like a native app, opens full-screen and keeps working offline after the first visit.</p>' +
+                    '<div class="grid grid-2" style="margin-top:14px">' +
+                    '<div class="card" style="padding:14px"><b style="font-size:12.5px;font-weight:800">Chrome / Edge (desktop)</b><p style="font-size:11.5px;color:var(--text-2);line-height:1.65;margin-top:6px">Click Install app below, or use the install icon in the address bar.</p></div>' +
+                    '<div class="card" style="padding:14px"><b style="font-size:12.5px;font-weight:800">Android / iPhone</b><p style="font-size:11.5px;color:var(--text-2);line-height:1.65;margin-top:6px">Open the browser menu and choose Install app or Add to Home screen.</p></div>' +
+                    '</div>' +
+                    '<div class="divider"></div>' +
+                    '<div class="label">Play Store</div>' +
+                    '<p style="font-size:12px;color:var(--text-2);line-height:1.7;margin-top:6px">A Play Store build is not published yet. Install the PWA now — it behaves the same, launches full-screen and updates instantly.</p>',
+                    true,
+                    standalone ? '<button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>' : '<button class="btn btn-ghost btn-sm" onclick="closeModal()">Later</button><button class="btn btn-accent btn-sm" onclick="closeModal();paosInstall()">' + icon("dl", 14) + ' Install app</button>')
             };
             let gPressed = false,
                 gTimer = null;
