@@ -1,9 +1,12 @@
 /* Polash AI OS — Service Worker (offline support) */
-const CACHE = 'polash-ai-os-v3';
+const CACHE = 'polash-ai-os-v4';
 const CORE = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './free-ai.json',
+  './privacy-policy.html',
+  './404.html',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png'
