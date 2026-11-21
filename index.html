@@ -12706,6 +12706,45 @@
     <noscript>
         <div style="position:fixed;inset:auto 12px 12px 12px;z-index:99999;background:#111827;color:#fff;border:1px solid #f6c453;border-radius:12px;padding:14px 16px;font:600 14px system-ui;text-align:center">Polash AI OS চালাতে ব্রাউজারে JavaScript অন করুন 🙏</div>
     </noscript>
+<style>
+        #polashAiBtn { position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: linear-gradient(135deg, #f6c453, #00d4ff); color: #0b1020; border: none; border-radius: 999px; padding: 12px 20px; font-weight: 800; font-size: 13.5px; box-shadow: 0 10px 30px rgba(0, 212, 255, 0.35); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        #polashAiBtn:hover { transform: scale(1.06); }
+        #aiModal { position: fixed; bottom: 80px; right: 24px; width: 350px; max-width: calc(100vw - 32px); background: #151d30; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 18px; box-shadow: 0 20px 50px rgba(2, 6, 18, 0.6); z-index: 9999; display: none; flex-direction: column; overflow: hidden; font-family: system-ui, sans-serif; backdrop-filter: blur(16px); }
+        #aiModal.active { display: flex; }
+        .aim-header { background: linear-gradient(135deg, rgba(246, 196, 83, 0.15), rgba(0, 212, 255, 0.15)); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(148, 163, 184, 0.15); }
+        .aim-title { font-weight: 700; font-size: 14px; color: #e9eefb; display: flex; align-items: center; gap: 8px; }
+        .aim-close { background: none; border: none; color: #9aa6bd; font-size: 16px; cursor: pointer; }
+        .aim-body { padding: 14px; max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .aim-msg { padding: 8px 12px; border-radius: 10px; font-size: 13px; line-height: 1.4; max-width: 90%; }
+        .aim-msg.bot { background: #1a2438; color: #e9eefb; align-self: flex-start; }
+        .aim-msg.user { background: #f6c453; color: #0b1020; align-self: flex-end; font-weight: 600; }
+        .aim-footer { padding: 10px 14px; border-top: 1px solid rgba(148, 163, 184, 0.15); display: flex; gap: 8px; background: #111827; }
+        .aim-input { flex: 1; background: #1a2438; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 8px; padding: 7px 10px; color: #e9eefb; font-size: 13px; outline: none; }
+        .aim-send { background: #f6c453; color: #0b1020; border: none; border-radius: 8px; padding: 0 12px; font-weight: 700; cursor: pointer; font-size: 13px; }
+    </style>
+    <button id="polashAiBtn" onclick="document.getElementById('aiModal').classList.toggle('active')"><span>✨ Polash AI Assistant</span></button>
+    <div id="aiModal">
+        <div class="aim-header">
+            <div class="aim-title"><span>🤖</span> Polash AI OS Assistant</div>
+            <button class="aim-close" onclick="document.getElementById('aiModal').classList.remove('active')">✕</button>
+        </div>
+        <div class="aim-body" id="aimStream">
+            <div class="aim-msg bot">Hello! I am Monjurul Islam Polash's AI Assistant. How can I help you today regarding web development, SEO, AI tools, or hiring Polash?</div>
+        </div>
+        <div class="aim-footer">
+            <input type="text" id="aimInput" class="aim-input" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')this.nextElementSibling.click()">
+            <button class="aim-send" onclick="var i=document.getElementById('aimInput'),s=document.getElementById('aimStream');if(i.value.trim()){var m=document.createElement('div');m.className='aim-msg user';m.textContent=i.value;s.appendChild(m);i.value='';setTimeout(function(){var b=document.createElement('div');b.className='aim-msg bot';b.textContent='Polash AI OS helps you Build, Learn, Earn, and Grow. Monjurul Islam Polash is an expert Web Developer & SEO Specialist!';s.appendChild(b);s.scrollTop=s.scrollHeight;},500);s.scrollTop=s.scrollHeight;}">Send</button>
+        </div>
+    </div>
+<style id="dock-overlap-fix">
+/* Bottom-right dock: Quick FAB (bottom) -> AI Assistant (above) -> modal above it. Install pill stays beside FAB. */
+#polashAiBtn{bottom:94px!important;right:22px!important}
+#aiModal{bottom:150px!important;right:22px!important}
+@media (max-width:640px){
+#polashAiBtn{bottom:154px!important;right:16px!important}
+#aiModal{bottom:210px!important;right:16px!important}
+}
+</style>
 </body>
 
 </html>
