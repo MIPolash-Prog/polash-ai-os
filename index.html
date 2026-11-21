@@ -12745,6 +12745,168 @@
 #aiModal{bottom:210px!important;right:16px!important}
 }
 </style>
+<script id="smart-studio">
+/* ===== Smart Studio additions: Ctrl+K palette, Kanban, Pomodoro, Quote Calculator, Pricing/FAQ ===== */
+(function(){
+"use strict";
+function $(s,r){return (r||document).querySelector(s)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+
+/* ---------- Ctrl+K Command Palette ---------- */
+var PAL_ROUTES=[["home","🏠 Home"],["dashboard","📊 Dashboard"],["tools","🧰 AI Tools"],["workspace","🗂️ Workspace"],["playbook","📘 Playbook"],["youtube","▶️ YouTube Hub"],["teaching","🎓 Teaching"],["learning","📚 Learning"],["knowledge","🧠 Knowledge Vault"],["growth","📈 Growth"],["automation","🤖 AI Automation"],["aifree","🆓 Free AI Hub"],["career","💼 Career & Freelance"],["portfolio","🖼️ Portfolio"],["insights","💡 Insights"],["services","🛠️ Services"],["smart","⚡ Smart Studio (Kanban · Pomodoro · Quote)"],["about","👤 About"],["contact","✉️ Contact"],["blog","📝 Insights / Blog"],["settings","⚙️ Settings"]];
+var palEl=null,palIdx=0,palList=[];
+function palBuild(){
+ if(palEl)return;
+ palEl=document.createElement("div");
+ palEl.id="cmdPalette";
+ palEl.style.cssText="position:fixed;inset:0;z-index:2000;display:none;align-items:flex-start;justify-content:center;background:rgba(3,6,16,.66);backdrop-filter:blur(6px);padding:12vh 16px 16px";
+ palEl.innerHTML='<div style="width:min(620px,100%);background:var(--surface,#111827);border:1px solid rgba(246,196,83,.35);border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55)">'
+ +'<input id="palInput" type="text" placeholder="Search pages… (Esc to close)" style="width:100%;padding:16px 18px;font-size:16px;background:transparent;border:none;outline:none;color:var(--text,#f4f7ff);border-bottom:1px solid rgba(148,163,184,.18)">'
+ +'<div id="palList" style="max-height:46vh;overflow:auto;padding:8px"></div></div>';
+ document.body.appendChild(palEl);
+ palEl.addEventListener("click",function(e){if(e.target===palEl)palClose()});
+ $("#palInput",palEl).addEventListener("input",function(){palRender(this.value)});
+ $("#palInput",palEl).addEventListener("keydown",function(e){
+   if(e.key==="ArrowDown"){e.preventDefault();palIdx=Math.min(palIdx+1,palList.length-1);palHi()}
+   else if(e.key==="ArrowUp"){e.preventDefault();palIdx=Math.max(palIdx-1,0);palHi()}
+   else if(e.key==="Enter"){e.preventDefault();if(palList[palIdx])palGo(palList[palIdx][0])}
+ });
+}
+function palRender(q){
+ q=(q||"").toLowerCase().trim();
+ palList=PAL_ROUTES.filter(function(r){return !q||r[1].toLowerCase().indexOf(q)>-1||r[0].indexOf(q)>-1});
+ palIdx=0;
+ $("#palList",palEl).innerHTML=palList.length?palList.map(function(r,i){
+   return '<div class="pal-item" data-r="'+r[0]+'" style="padding:11px 13px;border-radius:11px;cursor:pointer;font-size:14.5px;color:var(--text,#f4f7ff)">'+esc(r[1])+'</div>'}).join("")
+   :'<div style="padding:14px;color:var(--text-2,#9fb0c9);font-size:14px">No match found</div>';
+ Array.prototype.forEach.call(palEl.querySelectorAll(".pal-item"),function(el){
+   el.addEventListener("click",function(){palGo(el.getAttribute("data-r"))});
+ });
+ palHi();
+}
+function palHi(){
+ Array.prototype.forEach.call(palEl.querySelectorAll(".pal-item"),function(el,i){
+   el.style.background=i===palIdx?"rgba(246,196,83,.16)":"transparent";
+ });
+}
+function palGo(r){palClose();location.hash="#"+r}
+function palOpen(){palBuild();palEl.style.display="flex";palRender("");setTimeout(function(){$("#palInput",palEl).focus()},30)}
+function palClose(){if(palEl)palEl.style.display="none"}
+document.addEventListener("keydown",function(e){
+ if((e.ctrlKey||e.metaKey)&&(e.key||"").toLowerCase()==="k"){e.preventDefault();(palEl&&palEl.style.display==="flex")?palClose():palOpen()}
+ else if(e.key==="Escape")palClose();
+});
+window.openCmdPalette=palOpen;
+
+/* ---------- Smart Studio page ---------- */
+var KB_KEY="paos_kanban_v1";
+function kbLoad(){try{return JSON.parse(localStorage.getItem(KB_KEY))||{todo:[],doing:[],done:[]}}catch(e){return{todo:[],doing:[],done:[]}}}
+function kbSave(s){try{localStorage.setItem(KB_KEY,JSON.stringify(s))}catch(e){}}
+function kbRender(){
+ var s=kbLoad(),cols=[["todo","📝 To Do"],["doing","⏳ Doing"],["done","✅ Done"]];
+ var host=$("#kbBoard");if(!host)return;
+ host.innerHTML=cols.map(function(c){
+   var items=s[c[0]].map(function(t,i){
+     return '<div style="background:rgba(148,163,184,.09);border:1px solid rgba(148,163,184,.16);border-radius:11px;padding:10px 11px;margin-bottom:8px;font-size:13.5px">'
+     +'<div style="margin-bottom:7px;line-height:1.45">'+esc(t)+'</div>'
+     +'<div style="display:flex;gap:6px">'
+     +(c[0]!=="todo"?'<button class="btn btn-ghost btn-sm" onclick="kbMove(\''+c[0]+'\','+i+',-1)">←</button>':"")
+     +(c[0]!=="done"?'<button class="btn btn-ghost btn-sm" onclick="kbMove(\''+c[0]+'\','+i+',1)">→</button>':"")
+     +'<button class="btn btn-ghost btn-sm" onclick="kbDel(\''+c[0]+'\','+i+')">✕</button></div></div>'}).join("")||'<div style="color:var(--text-2,#9fb0c9);font-size:12.5px;padding:4px 2px">Empty</div>';
+   return '<div style="flex:1;min-width:210px"><h3 style="font-size:14px;font-weight:800;margin-bottom:10px">'+c[1]+' ('+s[c[0]].length+')</h3>'+items+'</div>'}).join("");
+}
+window.kbAdd=function(){
+ var inp=$("#kbNew");if(!inp||!inp.value.trim())return;
+ var s=kbLoad();s.todo.push(inp.value.trim());kbSave(s);inp.value="";kbRender();
+};
+window.kbMove=function(col,i,dir){
+ var s=kbLoad(),cols=["todo","doing","done"],ni=cols.indexOf(col)+dir;
+ if(ni<0||ni>2)return;
+ var t=s[col].splice(i,1)[0];s[cols[ni]].push(t);kbSave(s);kbRender();
+};
+window.kbDel=function(col,i){var s=kbLoad();s[col].splice(i,1);kbSave(s);kbRender()};
+
+/* Pomodoro */
+var pomoSec=25*60,pomoTimer=null;
+function pomoShow(){var el=$("#pomoDisplay");if(!el)return;var m=Math.floor(pomoSec/60),s=pomoSec%60;el.textContent=(m<10?"0":"")+m+":"+(s<10?"0":"")+s}
+window.pomoToggle=function(){
+ var btn=$("#pomoBtn");
+ if(pomoTimer){clearInterval(pomoTimer);pomoTimer=null;if(btn)btn.textContent="▶ Start";return}
+ if(btn)btn.textContent="⏸ Pause";
+ pomoTimer=setInterval(function(){
+   pomoSec--;pomoShow();
+   if(pomoSec<=0){clearInterval(pomoTimer);pomoTimer=null;pomoSec=25*60;pomoShow();var b=$("#pomoBtn");if(b)b.textContent="▶ Start";try{alert("⏰ Pomodoro complete! Take a 5-minute break.")}catch(e){}}
+ },1000);
+};
+window.pomoReset=function(){if(pomoTimer){clearInterval(pomoTimer);pomoTimer=null}var b=$("#pomoBtn");if(b)b.textContent="▶ Start";pomoSec=25*60;pomoShow()};
+
+/* Quote calculator */
+window.quoteCalc=function(){
+ var pages=Math.max(1,parseInt(($("#qPages")||{}).value||"1",10)||1);
+ var seo=($("#qSeo")||{}).checked, rush=($("#qRush")||{}).checked;
+ var total=pages*120+(seo?250:0); if(rush)total=Math.round(total*1.4);
+ var out=$("#qTotal"); if(out)out.textContent="$"+total;
+ var msg="Hello Polash! I need a website: "+pages+" page(s)"+(seo?", with SEO setup":"")+(rush?", rush delivery":"")+". Estimated budget: $"+total+". Please share next steps.";
+ var wa=$("#qWa"); if(wa)wa.href="https://wa.me/8801723328481?text="+encodeURIComponent(msg);
+};
+
+function smartHTML(){
+  return '<div class="page-hero"><h1>Smart <span class="grad">Studio</span></h1><p>Productivity tools borrowed from the best of all Polash AI OS versions — Kanban board, Pomodoro focus timer and instant price quote calculator.</p></div>'
+  +'<div class="card" style="margin-top:20px;padding:22px"><h2 style="font-size:16px;font-weight:850;margin-bottom:6px">🗂️ Kanban Board <span style="color:var(--text-2,#9fb0c9);font-weight:600;font-size:12px">(auto-saved in your browser)</span></h2>'
+  +'<div style="display:flex;gap:8px;margin:12px 0 16px"><input id="kbNew" type="text" placeholder="New task… e.g. Deliver SEO audit for client" style="flex:1;padding:11px 13px;border-radius:11px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.2);color:var(--text,#f4f7ff)" onkeydown="if(event.key===\'Enter\')kbAdd()"><button class="btn btn-primary" onclick="kbAdd()">+ Add Task</button></div>'
+  +'<div id="kbBoard" style="display:flex;gap:14px;flex-wrap:wrap"></div></div>'
+  +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px">'
+  +'<div class="card" style="padding:22px;text-align:center"><h2 style="font-size:16px;font-weight:850">🍅 Pomodoro Focus</h2><div id="pomoDisplay" style="font-size:52px;font-weight:900;letter-spacing:2px;margin:14px 0;color:var(--gold,#f6c453)">25:00</div><div style="display:flex;gap:8px;justify-content:center"><button id="pomoBtn" class="btn btn-primary" onclick="pomoToggle()">▶ Start</button><button class="btn btn-ghost" onclick="pomoReset()">↺ Reset</button></div><p style="color:var(--text-2,#9fb0c9);font-size:12.5px;margin-top:10px">25 min deep work · 5 min break</p></div>'
+  +'<div class="card" style="padding:22px"><h2 style="font-size:16px;font-weight:850;margin-bottom:12px">💲 Instant Price Quote</h2>'
+  +'<label style="font-size:13px;display:block;margin-bottom:6px">Number of pages</label><input id="qPages" type="number" min="1" value="5" style="width:100%;padding:10px 12px;border-radius:10px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.2);color:var(--text,#f4f7ff);margin-bottom:12px" oninput="quoteCalc()">'
+  +'<label style="font-size:13.5px;display:flex;gap:8px;align-items:center;margin-bottom:8px"><input id="qSeo" type="checkbox" onchange="quoteCalc()"> SEO setup (+$250)</label>'
+  +'<label style="font-size:13.5px;display:flex;gap:8px;align-items:center;margin-bottom:14px"><input id="qRush" type="checkbox" onchange="quoteCalc()"> Rush delivery (+40%)</label>'
+  +'<div style="font-size:15px;margin-bottom:12px">Estimated total: <b id="qTotal" style="color:var(--gold,#f6c453);font-size:20px">$600</b></div>'
+  +'<a id="qWa" class="btn btn-primary" target="_blank" rel="noopener" href="https://wa.me/8801723328481">📲 Send quote on WhatsApp</a></div>'
+  +'</div>'
+  +'<div class="card" style="margin-top:16px;padding:18px 22px;font-size:13.5px;color:var(--text-2,#9fb0c9)">⌨️ Tip: press <b style="color:var(--text,#f4f7ff)">Ctrl+K</b> anywhere to jump to any page instantly.</div>';
+}
+function appendPricing(){
+  var v=$("#view");if(!v||$("#pricingFaq"))return;
+  var sec=document.createElement("div");
+  sec.id="pricingFaq";
+  sec.innerHTML='<div class="card" style="margin-top:20px;padding:24px"><h2 style="font-size:18px;font-weight:880;margin-bottom:14px">💲 Transparent Pricing</h2>'
+  +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">'
+  +'<div style="border:1px solid rgba(148,163,184,.18);border-radius:14px;padding:18px"><b>Landing Page</b><div style="font-size:24px;font-weight:900;color:var(--gold,#f6c453);margin:8px 0">$120<span style="font-size:13px;color:var(--text-2,#9fb0c9)"> /page</span></div><div style="font-size:13px;color:var(--text-2,#9fb0c9);line-height:1.7">Design + build · mobile-first · 3-day delivery</div></div>'
+  +'<div style="border:1px solid rgba(246,196,83,.45);border-radius:14px;padding:18px"><b>Business Website</b><div style="font-size:24px;font-weight:900;color:var(--gold,#f6c453);margin:8px 0">$600<span style="font-size:13px;color:var(--text-2,#9fb0c9)"> /5 pages</span></div><div style="font-size:13px;color:var(--text-2,#9fb0c9);line-height:1.7">Full site · CMS-ready · basic SEO included</div></div>'
+  +'<div style="border:1px solid rgba(148,163,184,.18);border-radius:14px;padding:18px"><b>SEO Growth</b><div style="font-size:24px;font-weight:900;color:var(--gold,#f6c453);margin:8px 0">$250<span style="font-size:13px;color:var(--text-2,#9fb0c9)"> /month</span></div><div style="font-size:13px;color:var(--text-2,#9fb0c9);line-height:1.7">Audit · keywords · content plan · monthly report</div></div></div></div>'
+  +'<div class="card" style="margin-top:16px;padding:24px"><h2 style="font-size:18px;font-weight:880;margin-bottom:12px">❓ Frequently Asked Questions</h2>'
+  +'<div style="font-size:14px;line-height:1.8">'
+  +'<p><b>How fast can we start?</b><br><span style="color:var(--text-2,#9fb0c9)">Usually within 24 hours of the first WhatsApp chat.</span></p>'
+  +'<p><b>How do I pay?</b><br><span style="color:var(--text-2,#9fb0c9)">bKash / Rocket / Nagad (+8801723328481), Payoneer & PayPal — 50% to start, 50% on delivery.</span></p>'
+  +'<p><b>Do you provide revisions?</b><br><span style="color:var(--text-2,#9fb0c9)">Yes — structured revision rounds are included in every package.</span></p>'
+  +'<p><b>Can you maintain the site afterwards?</b><br><span style="color:var(--text-2,#9fb0c9)">Yes, monthly care plans are available after launch.</span></p>'
+  +'</div></div>';
+  v.appendChild(sec);
+}
+function appendHomeCard(){
+  var v=$("#view");if(!v||$("#smartHomeCard"))return;
+  var d=document.createElement("div");
+  d.id="smartHomeCard";
+  d.innerHTML='<div class="card" style="margin-top:20px;padding:20px 22px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between"><div><b style="font-size:16px">⚡ Smart Studio</b><div style="color:var(--text-2,#9fb0c9);font-size:13px;margin-top:3px">Kanban board · Pomodoro timer · Instant quote calculator</div></div><div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="openCmdPalette()">⌘K Search</button><a class="btn btn-primary" style="text-decoration:none" href="#smart">Open Studio →</a></div></div>';
+  v.appendChild(d);
+}
+function smartRoute(){
+  var r=((location.hash||"#home").slice(1).split("?")[0].split("/")[0]||"home");
+  if(r==="smart"){
+    var v=$("#view");if(!v)return;
+    v.innerHTML=smartHTML();
+    document.title="Smart Studio — Polash AI OS";
+    kbRender();pomoShow();quoteCalc();
+    try{window.scrollTo(0,0)}catch(e){}
+  }else if(r==="services"){appendPricing()}
+  else if(r==="home"){appendHomeCard()}
+}
+window.addEventListener("hashchange",function(){setTimeout(smartRoute,60)});
+document.addEventListener("DOMContentLoaded",function(){setTimeout(smartRoute,350)});
+setTimeout(smartRoute,1200);
+})();
+</script>
 </body>
 
 </html>
