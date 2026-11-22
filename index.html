@@ -12958,6 +12958,9 @@ function smartHTML(){
   +'<div class="card" style="margin-top:20px;padding:22px"><h2 style="font-size:16px;font-weight:850;margin-bottom:6px">🗂️ Kanban Board <span style="color:var(--text-2,#9fb0c9);font-weight:600;font-size:12px">(auto-saved in your browser)</span></h2>'
   +'<div style="display:flex;gap:8px;margin:12px 0 16px"><input id="kbNew" type="text" placeholder="New task… e.g. Deliver SEO audit for client" style="flex:1;padding:11px 13px;border-radius:11px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.2);color:var(--text,#f4f7ff)" onkeydown="if(event.key===\'Enter\')kbAdd()"><button class="btn btn-primary" onclick="kbAdd()">+ Add Task</button></div>'
   +'<div id="kbBoard" style="display:flex;gap:14px;flex-wrap:wrap"></div></div>'
+  +'<div class="card" style="margin-top:16px;padding:22px"><h2 style="font-size:16px;font-weight:850;margin-bottom:4px">🎯 Lead Tracker <span id="ldTotal" style="color:var(--gold,#f6c453);font-size:13px"></span></h2><div style="color:var(--text-2,#9fb0c9);font-size:12.5px;margin-bottom:12px">Inquiry → Quoted → Working → Done · auto-saved · contact form inquiries land here automatically</div>'
+  +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"><input id="ldName" type="text" placeholder="Lead name" style="flex:1;min-width:130px;padding:10px 12px;border-radius:10px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.2);color:var(--text,#f4f7ff)"><input id="ldContact" type="text" placeholder="WhatsApp / email" style="flex:1;min-width:130px;padding:10px 12px;border-radius:10px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.2);color:var(--text,#f4f7ff)"><input id="ldValue" type="number" min="0" placeholder="$ value" style="width:100px;padding:10px 12px;border-radius:10px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.2);color:var(--text,#f4f7ff)"><button class="btn btn-primary" onclick="ldAdd()">+ Add Lead</button></div>'
+  +'<div id="leadBoard" style="display:flex;gap:14px;flex-wrap:wrap"></div></div>'
   +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px">'
   +'<div class="card" style="padding:22px;text-align:center"><h2 style="font-size:16px;font-weight:850">🍅 Pomodoro Focus</h2><div id="pomoDisplay" style="font-size:52px;font-weight:900;letter-spacing:2px;margin:14px 0;color:var(--gold,#f6c453)">25:00</div><div style="display:flex;gap:8px;justify-content:center"><button id="pomoBtn" class="btn btn-primary" onclick="pomoToggle()">▶ Start</button><button class="btn btn-ghost" onclick="pomoReset()">↺ Reset</button></div><p style="color:var(--text-2,#9fb0c9);font-size:12.5px;margin-top:10px">25 min deep work · 5 min break</p></div>'
   +'<div class="card" style="padding:22px"><h2 style="font-size:16px;font-weight:850;margin-bottom:12px">💲 Instant Price Quote</h2>'
@@ -12965,7 +12968,7 @@ function smartHTML(){
   +'<label style="font-size:13.5px;display:flex;gap:8px;align-items:center;margin-bottom:8px"><input id="qSeo" type="checkbox" onchange="quoteCalc()"> SEO setup (+$250)</label>'
   +'<label style="font-size:13.5px;display:flex;gap:8px;align-items:center;margin-bottom:14px"><input id="qRush" type="checkbox" onchange="quoteCalc()"> Rush delivery (+40%)</label>'
   +'<div style="font-size:15px;margin-bottom:12px">Estimated total: <b id="qTotal" style="color:var(--gold,#f6c453);font-size:20px">$600</b></div>'
-  +'<a id="qWa" class="btn btn-primary" target="_blank" rel="noopener" href="https://wa.me/8801723328481">📲 Send quote on WhatsApp</a></div>'
+  +'<label style="font-size:13px;display:block;margin-bottom:6px">Client name (for PDF quote)</label><input id="qClient" type="text" placeholder="e.g. Sarah Ahmed" style="width:100%;padding:10px 12px;border-radius:10px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.2);color:var(--text,#f4f7ff);margin-bottom:12px">' +'<div style="display:flex;gap:8px;flex-wrap:wrap"><a id="qWa" class="btn btn-primary" target="_blank" rel="noopener" href="https://wa.me/8801723328481">📲 Send quote on WhatsApp</a><button class="btn btn-ghost" onclick="quotePdf()">📄 Download Quote (PDF)</button></div></div>'
   +'</div>'
   +'<div class="card" style="margin-top:16px;padding:18px 22px;font-size:13.5px;color:var(--text-2,#9fb0c9)">⌨️ Tip: press <b style="color:var(--text,#f4f7ff)">Ctrl+K</b> anywhere to jump to any page instantly.</div>';
 }
@@ -13131,6 +13134,116 @@ function aiInit(){
   if(s&&chatHist.length){s.innerHTML=""; chatHist.slice(-12).forEach(function(m){addMsg(m.role==="user"?"user":"bot",m.content)});}
   else if(s){addMsg("bot","Tip: tap ⚙️ and add a free Groq key to unlock my full AI brain 🧠");}
 }
+})();
+</script>
+
+<script id="phase2-smart">
+/* ===== Phase 2: Quote PDF + Lead Tracker + Smart Contact ===== */
+(function(){
+"use strict";
+function $(s){return document.querySelector(s)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+
+/* ---------- 2.1 Quote PDF ---------- */
+window.quotePdf=function(){
+  var pages=Math.max(1,parseInt(($("#qPages")||{}).value||"1",10)||1);
+  var seo=($("#qSeo")||{}).checked, rush=($("#qRush")||{}).checked;
+  var client=(($("#qClient")||{}).value||"").trim()||"Valued Client";
+  var base=pages*120+(seo?250:0), total=rush?Math.round(base*1.4):base;
+  var today=new Date(), valid=new Date(Date.now()+7*864e5);
+  var fmt=function(d){return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})};
+  var rows='<tr><td>Website — '+pages+' page(s) @ $120/page</td><td style="text-align:right">$'+(pages*120)+'</td></tr>'
+    +(seo?'<tr><td>SEO setup</td><td style="text-align:right">$250</td></tr>':"")
+    +(rush?'<tr><td>Rush delivery (+40%)</td><td style="text-align:right">$'+(total-base)+'</td></tr>':"");
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Quote — Polash IT Solutions</title><style>body{font-family:Georgia,serif;color:#0b1020;max-width:720px;margin:40px auto;padding:0 24px}h1{color:#b8860b;letter-spacing:.04em;margin:0}.sub{color:#555;font-size:13px}table{width:100%;border-collapse:collapse;margin:22px 0}td{padding:10px 6px;border-bottom:1px solid #ddd;font-size:15px}.tot{font-size:19px;font-weight:bold}.box{background:#fdf6e0;border:1px solid #e8cf8a;border-radius:10px;padding:14px 16px;font-size:13.5px;line-height:1.7}@media print{button{display:none}}</style></head><body>'
+   +'<h1>Polash IT Solutions</h1><div class="sub">POLASH AI OS · Web Development · SEO · AI Automation · Dhaka, Bangladesh (GMT+6) · 24/7</div>'
+   +'<h2 style="margin-top:28px">Price Quote</h2><p>Prepared for: <b>'+esc(client)+'</b><br>Date: '+fmt(today)+' · Valid until: '+fmt(valid)+'</p>'
+   +'<table>'+rows+'<tr><td class="tot">Estimated Total</td><td class="tot" style="text-align:right">$'+total+'</td></tr></table>'
+   +'<div class="box"><b>Payment methods:</b> bKash / Rocket / Nagad +8801723328481 · Payoneer mipolash13@gmail.com · PayPal mipolash12@gmail.com<br><b>Next step:</b> Reply on WhatsApp +8801723328481 or Fiverr (website1_1) to start. 50% advance, 50% on delivery.</div>'
+   +'<p style="margin-top:26px;font-size:13px;color:#555">Thank you for choosing Polash IT Solutions — a husband &amp; wife team crafting websites that grow businesses.</p>'
+   +'<button onclick="window.print()" style="margin-top:14px;padding:10px 18px;font-size:14px;cursor:pointer">🖨️ Print / Save as PDF</button>'
+   +'<script>setTimeout(function(){window.print()},400)<\/script></body></html>';
+  var tab=window.open("","_blank");
+  if(tab){tab.document.write(html);tab.document.close();}
+  else{var b=new Blob([html],{type:"text/html"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="Polash-Quote.html";a.click();}
+  if(window.agentLog)window.agentLog("quote-pdf: generated for "+client+" — $"+total,"ok");
+};
+
+/* ---------- 2.2 Lead Tracker ---------- */
+var LD_KEY="paos_leads_v1", LD_COLS=[["inquiry","📥 Inquiry"],["quoted","💲 Quoted"],["working","🛠️ Working"],["done","✅ Done"]];
+function ldLoad(){try{return JSON.parse(localStorage.getItem(LD_KEY))||[]}catch(e){return[]}}
+function ldSave(a){try{localStorage.setItem(LD_KEY,JSON.stringify(a))}catch(e){}}
+window.ldRender=function(){
+  var host=$("#leadBoard"); if(!host)return;
+  var leads=ldLoad(), total=leads.reduce(function(s,l){return s+(+l.v||0)},0);
+  var tt=$("#ldTotal"); if(tt)tt.textContent="· Pipeline: $"+total+" · "+leads.length+" lead(s)";
+  host.innerHTML=LD_COLS.map(function(c){
+    var items=leads.map(function(l,i){return[l,i]}).filter(function(x){return x[0].stage===c[0]}).map(function(x){
+      var l=x[0],i=x[1], digits=(l.contact||"").replace(/\D/g,"");
+      return '<div style="background:rgba(148,163,184,.09);border:1px solid rgba(148,163,184,.16);border-radius:11px;padding:10px 11px;margin-bottom:8px;font-size:13px">'
+      +'<b>'+esc(l.name)+'</b>'+(l.v?' <span style="color:var(--gold,#f6c453);font-weight:800">$'+esc(l.v)+'</span>':"")
+      +(l.need?'<div style="color:var(--text-2,#9fb0c9);font-size:12px;margin:3px 0">'+esc(l.need)+'</div>':"")
+      +(l.contact?'<div style="color:var(--text-2,#9fb0c9);font-size:12px;margin-bottom:7px">'+esc(l.contact)+'</div>':'<div style="margin-bottom:7px"></div>')
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+      +(c[0]!=="inquiry"?'<button class="btn btn-ghost btn-sm" onclick="ldMove('+i+',-1)">←</button>':"")
+      +(c[0]!=="done"?'<button class="btn btn-ghost btn-sm" onclick="ldMove('+i+',1)">→</button>':"")
+      +(digits.length>=10?'<a class="btn btn-ghost btn-sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/'+digits+'">💬</a>':"")
+      +'<button class="btn btn-ghost btn-sm" onclick="ldDel('+i+')">✕</button></div></div>'}).join("")||'<div style="color:var(--text-2,#9fb0c9);font-size:12.5px">Empty</div>';
+    return '<div style="flex:1;min-width:190px"><h3 style="font-size:14px;font-weight:800;margin-bottom:10px">'+c[1]+'</h3>'+items+'</div>'}).join("");
+};
+window.ldAdd=function(name,contact,need,value){
+  var n=name||(($("#ldName")||{}).value||"").trim(); if(!n)return;
+  var leads=ldLoad();
+  leads.push({name:n,contact:contact||(($("#ldContact")||{}).value||"").trim(),need:need||"Website project",v:value!=null?value:(($("#ldValue")||{}).value||""),stage:"inquiry",ts:Date.now()});
+  ldSave(leads);
+  if(!name){var a=$("#ldName"),b=$("#ldContact"),c2=$("#ldValue"); if(a)a.value=""; if(b)b.value=""; if(c2)c2.value="";}
+  window.ldRender();
+  if(window.agentLog)window.agentLog("lead-tracker: new lead — "+n,"ok");
+};
+window.ldMove=function(i,dir){var leads=ldLoad(),cols=LD_COLS.map(function(c){return c[0]}),ni=cols.indexOf(leads[i].stage)+dir; if(ni<0||ni>3)return; leads[i].stage=cols[ni]; ldSave(leads); window.ldRender();};
+window.ldDel=function(i){var leads=ldLoad(); leads.splice(i,1); ldSave(leads); window.ldRender();};
+
+/* ---------- 2.3 Smart Contact ---------- */
+var DRAFT_KEY="paos_contact_draft_v1";
+function contactEnhance(){
+  if(!$("#cName")||$("#smartContactPanel"))return;
+  // draft restore
+  try{var d=JSON.parse(localStorage.getItem(DRAFT_KEY)||"{}"); if(d.name&&!$("#cName").value)$("#cName").value=d.name; if(d.msg&&!$("#cMsg").value)$("#cMsg").value=d.msg;}catch(e){}
+  ["cName","cMsg"].forEach(function(id){var el=document.getElementById(id); if(el)el.addEventListener("input",function(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify({name:($("#cName")||{}).value||"",msg:($("#cMsg")||{}).value||""}))}catch(e){}})});
+  var panel=document.createElement("div"); panel.id="smartContactPanel";
+  panel.style.cssText="margin-top:14px;padding:14px;border-radius:12px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.22);font-size:13px;line-height:1.7";
+  panel.innerHTML='<b>⚡ Smart extras</b> — budget &amp; timeline are added to your message automatically, and your inquiry is saved to the Lead Tracker (Smart Studio).<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px"><select id="cBudget" class="select" style="flex:1;min-width:150px"><option value="">Budget (optional)</option><option>Under $200</option><option>$200 – $600</option><option>$600 – $1,500</option><option>$1,500+</option></select><select id="cWhen" class="select" style="flex:1;min-width:150px"><option value="">Timeline (optional)</option><option>ASAP (rush)</option><option>Within 1 week</option><option>Within 1 month</option><option>Flexible</option></select></div><div id="cThanks"></div>';
+  var msgField=$("#cMsg"); if(msgField&&msgField.closest(".field"))msgField.closest(".field").after(panel);
+  // wrap senders: append extras + save lead + thank-you
+  ["sendWhatsApp","sendEmail","copyInquiry"].forEach(function(fn){
+    if(typeof window[fn]==="function"&&!window[fn]._p2){
+      var orig=window[fn];
+      var wrapped=function(){
+        var extra=[];
+        var b=($("#cBudget")||{}).value, w=($("#cWhen")||{}).value;
+        if(b)extra.push("Budget: "+b); if(w)extra.push("Timeline: "+w);
+        var ta=$("#cMsg"), old=ta?ta.value:"";
+        if(extra.length&&ta&&old.indexOf("Budget:")<0)ta.value=old+"\n\n["+extra.join(" · ")+"]";
+        orig();
+        if(ta)ta.value=old;
+        var nm=($("#cName")||{}).value||"Website visitor", nd=($("#cNeed")||{}).value||"Project inquiry";
+        window.ldAdd(nm,"",nd+(b?" · "+b:""),"");
+        try{localStorage.removeItem(DRAFT_KEY)}catch(e){}
+        var th=$("#cThanks");
+        if(th)th.innerHTML='<div style="margin-top:10px;padding:12px;border-radius:10px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4)">✅ <b>Thank you, '+esc(nm)+'!</b> Your inquiry is saved. Polash IT Solutions (husband &amp; wife team) usually replies within <b>1 hour</b> — Dhaka, 24/7. Need it faster? WhatsApp +8801723328481.</div>';
+      };
+      wrapped._p2=true; window[fn]=wrapped;
+    }
+  });
+}
+function onRoute(){
+  var r=((location.hash||"#home").slice(1).split("?")[0].split("/")[0]||"home");
+  if($("#leadBoard"))window.ldRender();
+  if(r==="contact")setTimeout(contactEnhance,80);
+}
+window.addEventListener("hashchange",function(){setTimeout(onRoute,120)});
+document.addEventListener("DOMContentLoaded",function(){setTimeout(onRoute,600)});
+setTimeout(onRoute,1500);
 })();
 </script>
 
