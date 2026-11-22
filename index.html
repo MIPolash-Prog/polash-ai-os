@@ -13529,6 +13529,16 @@ window.tagWay=function(i){
   if(!go()){ var n=0; var t=setInterval(function(){ n++; if(go()||n>24)clearInterval(t); },150); }
 };
 </script>
+
+<style id="fourways-v2">
+/* Owner request: gateway card text bolder & bigger for easy reading */
+#fourWays .card>a>div:nth-child(2){font-size:25px!important;font-weight:900!important;letter-spacing:.1em!important}
+#fourWays .card>a>div:nth-child(3){font-size:14.5px!important;font-weight:650!important;color:#dbe6f5!important;line-height:1.6!important}
+#fourWays .card>div a{font-size:13.5px!important;font-weight:800!important;padding:8px 12px!important;color:#ffffff!important;border-color:rgba(246,196,83,.4)!important}
+[data-theme="light"] #fourWays .card>a>div:nth-child(3){color:#334155!important}
+[data-theme="light"] #fourWays .card>div a{color:#0b1020!important}
+@media (max-width:640px){#fourWays .card>a>div:nth-child(2){font-size:22px!important}#fourWays .card>a>div:nth-child(3){font-size:13.5px!important}#fourWays .card>div a{font-size:12.5px!important}}
+</style>
 </body>
 
 </html>
