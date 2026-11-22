@@ -13440,6 +13440,20 @@ setTimeout(onRoute,1700);
 .fab-wrap{display:none!important}
 #pwaInstallBtn{display:none!important}
 </style>
+
+<style id="hero-rows-v3">
+/* Owner request: hero buttons compact — exactly 2 rows at hero bottom (CTA row + chips row), swipe-scroll on small screens */
+.hero-cta{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto;gap:8px!important;padding-bottom:5px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.hero-cta::-webkit-scrollbar{display:none}
+.hero-cta .btn{flex:0 0 auto;padding:9px 13px!important;font-size:13px!important;border-radius:11px!important;white-space:nowrap}
+.cmd-strip{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto;gap:7px!important;padding-bottom:5px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.cmd-strip::-webkit-scrollbar{display:none}
+.cmd-chip{flex:0 0 auto;padding:6px 10px!important;font-size:12px!important;white-space:nowrap}
+@media (max-width:640px){
+.hero-cta .btn{padding:8px 11px!important;font-size:12px!important}
+.cmd-chip{padding:5px 9px!important;font-size:11.5px!important}
+}
+</style>
 </body>
 
 </html>
