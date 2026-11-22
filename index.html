@@ -12968,6 +12968,8 @@ function smartHTML(){
   +'<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" onclick="wtSend()">📲 Send on WhatsApp</button><button class="btn btn-ghost" onclick="wtCopy()">📋 Copy Template</button></div><div id="wtPreview" style="margin-top:12px;font-size:13px;line-height:1.7;color:var(--text-2,#9fb0c9);white-space:pre-wrap"></div></div>'
   +'<div class="card" style="margin-top:16px;padding:22px"><h2 style="font-size:16px;font-weight:850;margin-bottom:4px">🔗 Automation Bridge <span style="color:var(--text-2,#9fb0c9);font-weight:600;font-size:12px">(n8n / webhook)</span></h2><div style="color:var(--text-2,#9fb0c9);font-size:12.5px;margin-bottom:12px">Paste your n8n webhook URL — every new lead will be sent there automatically (email/Sheet/CRM in n8n). Workflow file: ask in AI Agent to export.</div>'
   +'<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="n8nUrl" type="url" placeholder="https://your-n8n…/webhook/polash-leads" style="flex:1;min-width:220px;padding:10px 12px;border-radius:10px;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.2);color:var(--text,#f4f7ff)"><button class="btn btn-primary" onclick="n8nSave()">💾 Save</button><button class="btn btn-ghost" onclick="n8nTest()">🧪 Test Ping</button></div><div id="n8nStat" style="margin-top:10px;font-size:13px;color:var(--text-2,#9fb0c9)"></div></div>'
+  +'<div class="card" style="margin-top:16px;padding:22px"><h2 style="font-size:16px;font-weight:850;margin-bottom:4px">🔍 SEO Self-Audit <span style="color:var(--text-2,#9fb0c9);font-weight:600;font-size:12px">(this site, live scan)</span></h2><div style="color:var(--text-2,#9fb0c9);font-size:12.5px;margin-bottom:12px">Scans the live page: title, meta, headings, image alt, canonical, social tags — with a score and fixes.</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><button class="btn btn-primary" onclick="seoAudit()">▶ Run Audit</button><button class="btn btn-ghost" onclick="seoAuditCopy()">📋 Copy Report</button><span id="seoScore" style="align-self:center;font-weight:900;color:var(--gold,#f6c453)"></span></div><div id="seoOut" style="font-size:13.5px;line-height:1.8"></div></div>'
+  +'<div class="card" style="margin-top:16px;padding:22px"><h2 style="font-size:16px;font-weight:850;margin-bottom:12px">📈 Workspace Analytics <span style="color:var(--text-2,#9fb0c9);font-weight:600;font-size:12px">(stored locally, private)</span></h2><div id="p4Analytics" style="font-size:13.5px;line-height:1.8"></div></div>'
   +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px">'
   +'<div class="card" style="padding:22px;text-align:center"><h2 style="font-size:16px;font-weight:850">🍅 Pomodoro Focus</h2><div id="pomoDisplay" style="font-size:52px;font-weight:900;letter-spacing:2px;margin:14px 0;color:var(--gold,#f6c453)">25:00</div><div style="display:flex;gap:8px;justify-content:center"><button id="pomoBtn" class="btn btn-primary" onclick="pomoToggle()">▶ Start</button><button class="btn btn-ghost" onclick="pomoReset()">↺ Reset</button></div><p style="color:var(--text-2,#9fb0c9);font-size:12.5px;margin-top:10px">25 min deep work · 5 min break</p></div>'
   +'<div class="card" style="padding:22px"><h2 style="font-size:16px;font-weight:850;margin-bottom:12px">💲 Instant Price Quote</h2>'
@@ -13335,6 +13337,99 @@ function onRoute(){ if($("#leadBoard")||$("#cpOut")||$("#n8nUrl")){ setTimeout(n
 window.addEventListener("hashchange",function(){setTimeout(onRoute,150)});
 document.addEventListener("DOMContentLoaded",function(){setTimeout(onRoute,700)});
 setTimeout(onRoute,1600);
+})();
+</script>
+
+<script id="phase4-smart">
+/* ===== Phase 4: SEO self-audit + local analytics + A/B hero test ===== */
+(function(){
+"use strict";
+function $(s){return document.querySelector(s)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function jget(k,d){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch(e){return d}}
+function jset(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+/* sessions */
+try{var ss=+localStorage.getItem("paos_sessions")||0;localStorage.setItem("paos_sessions",String(ss+1))}catch(e){}
+
+/* ---------- 4.1 SEO self-audit ---------- */
+var lastSeoReport="";
+window.seoAudit=function(){
+  var out=$("#seoOut"); if(!out)return;
+  var checks=[];
+  function ck(name,ok,fix){checks.push({name:name,ok:!!ok,fix:fix||""})}
+  var title=document.title||"";
+  ck("Title tag ("+title.length+" chars)", title.length>=20&&title.length<=65, "Keep title 20–65 characters");
+  var md=document.querySelector('meta[name="description"]');
+  ck("Meta description", !!(md&&md.content&&md.content.length>=80), "Add an 80–160 char meta description");
+  var canon=document.querySelector('link[rel="canonical"]');
+  ck("Canonical URL", !!canon, "Add <link rel=canonical>");
+  ck("Open Graph tags", !!document.querySelector('meta[property="og:title"]'), "Add og:title / og:image for social sharing");
+  ck("Twitter card", !!document.querySelector('meta[name="twitter:card"]'), "Add twitter:card meta");
+  var h1=document.querySelectorAll("#view h1, .page-hero h1").length;
+  ck("Single clear H1 on page", h1>=1, "Ensure one H1 per view");
+  var imgs=document.querySelectorAll("#view img"), noAlt=0;
+  imgs.forEach(function(im){if(!im.getAttribute("alt"))noAlt++});
+  ck("Image alt text ("+imgs.length+" imgs, "+noAlt+" missing)", noAlt===0, "Add alt text to images");
+  var links=document.querySelectorAll('#view a[href^="#"]').length;
+  ck("Internal links present ("+links+")", links>=3, "Link related pages together");
+  ck("Mobile viewport", !!document.querySelector('meta[name="viewport"]'), "Add viewport meta");
+  ck("Language declared", !!(document.documentElement.getAttribute("lang")), "Set <html lang>");
+  var score=Math.round(checks.filter(function(c){return c.ok}).length/checks.length*100);
+  var sc=$("#seoScore"); if(sc)sc.textContent="Score: "+score+"/100";
+  out.innerHTML=checks.map(function(c){return '<div style="padding:7px 11px;border:1px solid rgba(148,163,184,.16);border-radius:10px;margin-bottom:7px;background:rgba(148,163,184,.06)">'+(c.ok?"✅":"⚠️")+" <b>"+esc(c.name)+"</b>"+(c.ok?"":' <span style="color:var(--text-2,#9fb0c9)">— '+esc(c.fix)+"</span>")+"</div>"}).join("");
+  lastSeoReport="Polash AI OS — SEO Self-Audit ("+new Date().toLocaleString()+")\nScore: "+score+"/100\n"+checks.map(function(c){return (c.ok?"[OK] ":"[FIX] ")+c.name+(c.ok?"":" — "+c.fix)}).join("\n");
+  if(window.agentLog)window.agentLog("seo-audit: score "+score+"/100","ok");
+};
+window.seoAuditCopy=function(){ if(!lastSeoReport){window.seoAudit()} if(!lastSeoReport)return; if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(lastSeoReport).then(function(){if(window.toast)toast("SEO report copied 📋")}); else if(window.copyText)copyText(lastSeoReport,"SEO report copied 📋"); };
+
+/* ---------- 4.3 A/B hero test ---------- */
+var ABV_KEY="paos_ab_variant";
+function abVariant(){try{var v=localStorage.getItem(ABV_KEY); if(v!=="A"&&v!=="B"){v=Math.random()<0.5?"A":"B"; localStorage.setItem(ABV_KEY,v)} return v}catch(e){return"A"}}
+function abApply(){
+  var r=((location.hash||"#home").slice(1).split("?")[0].split("/")[0]||"home"); if(r!=="home")return;
+  var v=abVariant();
+  var views=jget("paos_ab_views",{}); views[v]=(views[v]||0)+1; jset("paos_ab_views",views);
+  if(v==="B"){
+    var lede=document.querySelector("#view .lede");
+    if(lede&&!lede.dataset.ab){lede.dataset.ab="B"; lede.innerHTML="Websites, SEO and AI automation that grow your business — built by <b>Polash IT Solutions</b>, a husband &amp; wife team in Dhaka serving clients worldwide, 24/7. 610 AI tools, portfolio and instant quote inside.";}
+  }
+}
+document.addEventListener("click",function(e){
+  var r=((location.hash||"#home").slice(1).split("?")[0].split("/")[0]||"home"); if(r!=="home")return;
+  var btn=e.target&&e.target.closest?e.target.closest(".hero-cta .btn"):null; if(!btn)return;
+  var v=abVariant(), clicks=jget("paos_ab_clicks",{}); clicks[v]=(clicks[v]||0)+1; jset("paos_ab_clicks",clicks);
+});
+
+/* ---------- 4.2 Analytics ---------- */
+function bar(label,val,max,extra){
+  var pct=max?Math.round(val/max*100):0;
+  return '<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12.5px"><span>'+esc(label)+'</span><b>'+val+(extra||"")+'</b></div><div style="height:8px;border-radius:99px;background:rgba(148,163,184,.15);overflow:hidden"><div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#f6c453,#00d4ff);border-radius:99px"></div></div></div>';
+}
+window.p4Render=function(){
+  var host=$("#p4Analytics"); if(!host)return;
+  var usage=jget("paos_route_usage",{}), pal=jget("paos_pal_usage",{}), leads=jget("paos_leads_v1",[]);
+  var sessions=0; try{sessions=+localStorage.getItem("paos_sessions")||0}catch(e){}
+  var totalViews=Object.keys(usage).reduce(function(s,k){return s+usage[k]},0);
+  var topPages=Object.keys(usage).sort(function(a,b){return usage[b]-usage[a]}).slice(0,5);
+  var maxP=topPages.length?usage[topPages[0]]:0;
+  var topPal=Object.keys(pal).sort(function(a,b){return pal[b]-pal[a]}).slice(0,5);
+  var maxT=topPal.length?pal[topPal[0]]:0;
+  var pipe=leads.reduce(function(s,l){return s+(+l.v||0)},0);
+  var views=jget("paos_ab_views",{}), clicks=jget("paos_ab_clicks",{});
+  function ctr(v){return views[v]?((clicks[v]||0)/views[v]*100).toFixed(1)+"%":"—"}
+  host.innerHTML='<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px">'
+   +'<div style="flex:1;min-width:120px;padding:12px;border-radius:12px;background:rgba(246,196,83,.09);border:1px solid rgba(246,196,83,.3)"><div style="font-size:22px;font-weight:900;color:var(--gold,#f6c453)">'+sessions+'</div><div style="font-size:12px;color:var(--text-2,#9fb0c9)">Sessions</div></div>'
+   +'<div style="flex:1;min-width:120px;padding:12px;border-radius:12px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.28)"><div style="font-size:22px;font-weight:900;color:#00d4ff">'+totalViews+'</div><div style="font-size:12px;color:var(--text-2,#9fb0c9)">Page views</div></div>'
+   +'<div style="flex:1;min-width:120px;padding:12px;border-radius:12px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3)"><div style="font-size:22px;font-weight:900;color:#22c55e">'+leads.length+'</div><div style="font-size:12px;color:var(--text-2,#9fb0c9)">Leads · $'+pipe+' pipeline</div></div></div>'
+   +'<b>🏆 Top pages</b><div style="margin:8px 0 14px">'+(topPages.map(function(k){return bar("📌 "+k,usage[k],maxP)}).join("")||"No data yet — browse a few pages!")+'</div>'
+   +'<b>🔎 Top searches / picks</b><div style="margin:8px 0 14px">'+(topPal.map(function(k){return bar(k,pal[k],maxT)}).join("")||"No palette data yet — press Ctrl+K and pick something!")+'</div>'
+   +'<b>🧪 A/B Hero Test</b><div style="margin-top:8px;font-size:13px">Variant A (original): '+ (views.A||0) +' views · '+(clicks.A||0)+' CTA clicks · CTR '+ctr("A")+'<br>Variant B (benefit-first): '+(views.B||0)+' views · '+(clicks.B||0)+' CTA clicks · CTR '+ctr("B")+'<br><span style="color:var(--text-2,#9fb0c9)">Your variant: <b>'+abVariant()+'</b> — the higher CTR wins; we keep the winner as default.</span></div>';
+};
+function onRoute(){ setTimeout(abApply,500); setTimeout(window.p4Render,700); }
+window.addEventListener("hashchange",onRoute);
+document.addEventListener("DOMContentLoaded",function(){setTimeout(onRoute,800)});
+setTimeout(onRoute,1700);
 })();
 </script>
 
