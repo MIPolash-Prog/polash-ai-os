@@ -13543,6 +13543,36 @@ window.tagWay=function(i){
 .fab-wrap{bottom:22px!important;right:22px!important;z-index:1200!important}
 @media (max-width:640px){.fab-wrap{bottom:84px!important;right:16px!important}}
 </style>
+<script id="my-apps">
+/* ===== My Connected Apps — one-click openers (Gmail · Drive · Docs · Dropbox) ===== */
+(function(){
+"use strict";
+function $(s){return document.querySelector(s)}
+var APPS=[
+ {n:"Gmail",icon:"📧",url:"https://mail.google.com",c:"#ea4335",d:"Mail inbox"},
+ {n:"Google Drive",icon:"🗂️",url:"https://drive.google.com",c:"#f6c453",d:"Files & folders"},
+ {n:"Google Docs",icon:"📄",url:"https://docs.google.com",c:"#00d4ff",d:"Documents"},
+ {n:"Dropbox",icon:"📦",url:"https://www.dropbox.com/home",c:"#60a5fa",d:"Cloud storage"}
+];
+function build(){
+  var r=((location.hash||"#home").slice(1).split("?")[0].split("/")[0]||"home");
+  if(r!=="home")return;
+  var v=$("#view"); if(!v||$("#myApps"))return;
+  var d=document.createElement("div"); d.id="myApps";
+  d.innerHTML='<div class="card" style="margin-top:20px;padding:20px 22px"><b style="font-size:16.5px">🔗 My Connected Apps</b>'
+   +'<div style="color:var(--text-2,#9fb0c9);font-size:13px;margin:4px 0 14px">One click opens each app in a new tab — signed in with your Google / Dropbox account in this browser.</div>'
+   +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">'
+   +APPS.map(function(a){return '<a href="'+a.url+'" target="_blank" rel="noopener" style="text-decoration:none;display:flex;align-items:center;gap:11px;padding:14px;border-radius:14px;background:rgba(148,163,184,.07);border:1px solid '+a.c+'55;border-top:3px solid '+a.c+';color:var(--text,#f4f7ff)"><span style="font-size:25px">'+a.icon+'</span><span><b style="font-size:14.5px;display:block">'+a.n+'</b><span style="font-size:12px;color:var(--text-2,#9fb0c9)">'+a.d+'</span></span></a>'}).join("")
+   +'</div></div>';
+  var anchor=$("#forYouCard")||$("#smartHomeCard");
+  if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(d,anchor); else v.appendChild(d);
+}
+window.addEventListener("hashchange",function(){setTimeout(build,500)});
+document.addEventListener("DOMContentLoaded",function(){setTimeout(build,750)});
+setTimeout(build,1600);
+})();
+</script>
+
 </body>
 
 </html>
