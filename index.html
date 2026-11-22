@@ -10149,6 +10149,16 @@
                 if (q) all = all.filter(function(x) {
                     return x.label.toLowerCase().indexOf(q) > -1 || (x.sub || "").toLowerCase().indexOf(q) > -1
                 });
+                /* Phase 1.2: smart ranking — frequently/recently used first */
+                var _pu = {};
+                try { _pu = JSON.parse(localStorage.getItem("paos_pal_usage") || "{}") } catch (e) {}
+                all.forEach(function(x) {
+                    var u = _pu[x.type + "|" + x.label] || 0;
+                    var m = 0;
+                    if (q) { var ll = x.label.toLowerCase(); if (ll.indexOf(q) === 0) m = 30; else if (ll.indexOf(q) > -1) m = 12 }
+                    x._score = u * 4 + m
+                });
+                all.sort(function(a, b) { return b._score - a._score });
                 return all.slice(0, 48)
             }
             window._palItems = paletteItems;
@@ -10186,7 +10196,15 @@
             window.renderPalette = renderPalette;
             window.palRun = function(i) {
                 const x = palCache[i];
-                if (x) x.act()
+                if (x) {
+                    try {
+                        var u = JSON.parse(localStorage.getItem("paos_pal_usage") || "{}");
+                        var k = x.type + "|" + x.label;
+                        u[k] = (u[k] || 0) + 1;
+                        localStorage.setItem("paos_pal_usage", JSON.stringify(u))
+                    } catch (e) {}
+                    x.act()
+                }
             };
             window.palKeys = function(e) {
                 if (e.key === "ArrowDown") {
@@ -12809,7 +12827,7 @@
     <div id="aiModal">
         <div class="aim-header">
             <div class="aim-title"><span>🤖</span> Polash AI OS Assistant</div>
-            <button class="aim-close" onclick="document.getElementById('aiModal').classList.remove('active')">✕</button>
+            <span style="display:flex;gap:4px;align-items:center"><button class="aim-close" id="aimKeyBtn" title="AI brain settings (free Groq key)" style="font-size:14px">⚙️</button><button class="aim-close" onclick="document.getElementById('aiModal').classList.remove('active')">✕</button></span>
         </div>
         <div class="aim-body" id="aimStream">
             <div class="aim-msg bot">Hello! I am Monjurul Islam Polash's AI Assistant. How can I help you today regarding web development, SEO, AI tools, or hiring Polash?</div>
@@ -12858,6 +12876,8 @@ function palBuild(){
 function palRender(q){
  q=(q||"").toLowerCase().trim();
  palList=PAL_ROUTES.filter(function(r){return !q||r[1].toLowerCase().indexOf(q)>-1||r[0].indexOf(q)>-1});
+ var _ru={}; try{_ru=JSON.parse(localStorage.getItem("paos_route_usage")||"{}")}catch(e){}
+ palList.sort(function(a,b){return ((_ru[b[0]]||0)-(_ru[a[0]]||0))});
  palIdx=0;
  $("#palList",palEl).innerHTML=palList.length?palList.map(function(r,i){
    return '<div class="pal-item" data-r="'+r[0]+'" style="padding:11px 13px;border-radius:11px;cursor:pointer;font-size:14.5px;color:var(--text,#f4f7ff)">'+esc(r[1])+'</div>'}).join("")
@@ -13001,6 +13021,119 @@ setTimeout(smartRoute,1200);
 <script>
 document.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("agentCallBtn");var s=document.querySelector(".top-search");if(b&&s&&s.parentNode){s.parentNode.insertBefore(b,s.nextSibling)}});
 </script>
+<script id="phase1-smart">
+/* ===== Phase 1: Real AI brain (Groq free, BYO key) + route usage + For You home ===== */
+(function(){
+"use strict";
+var LS_KEY="paos_Groq_key", LS_MODEL="paos_Groq_model", LS_CHAT="paos_ai_chat_v1", LS_USE="paos_route_usage", LS_REC="paos_route_recent";
+function $(s){return document.querySelector(s)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function getKey(){try{return localStorage.getItem(LS_KEY)||""}catch(e){return""}}
+function getModel(){try{return localStorage.getItem(LS_MODEL)||"llama-3.3-70b-versatile"}catch(e){return"llama-3.3-70b-versatile"}}
+
+/* ---------- route usage tracking (1.2 + 1.3 data) ---------- */
+function trackRoute(){
+  var r=((location.hash||"#home").slice(1).split("?")[0].split("/")[0]||"home");
+  try{
+    var u=JSON.parse(localStorage.getItem(LS_USE)||"{}"); u[r]=(u[r]||0)+1; localStorage.setItem(LS_USE,JSON.stringify(u));
+    var rec=JSON.parse(localStorage.getItem(LS_REC)||"[]"); rec=rec.filter(function(x){return x!==r}); rec.unshift(r); localStorage.setItem(LS_REC,JSON.stringify(rec.slice(0,6)));
+  }catch(e){}
+}
+window.addEventListener("hashchange",function(){trackRoute(); setTimeout(forYou,450)});
+function routeName(r){var m={home:"🏠 Home",dashboard:"📊 Dashboard",tools:"🧰 AI Tools",workspace:"🗂️ Workspace",youtube:"▶️ YouTube",teaching:"🎓 Teaching",learning:"📚 Learning",playbook:"📘 Playbook",automation:"🤖 Automation",smart:"⚡ Smart Studio",aifree:"🆓 Free AI Hub",career:"💼 Career",portfolio:"🖼️ Portfolio",blog:"📝 Blog",services:"🛠️ Services",about:"👤 About",contact:"✉️ Contact",settings:"⚙️ Settings",knowledge:"🧠 Knowledge",growth:"📈 Growth",insights:"💡 Insights"};return m[r]||("📌 "+r)}
+
+/* ---------- 1.3 For You home ---------- */
+function forYou(){
+  var r=((location.hash||"#home").slice(1).split("?")[0].split("/")[0]||"home");
+  if(r!=="home")return;
+  var v=$("#view"); if(!v||$("#forYouCard"))return;
+  var u={},rec=[]; try{u=JSON.parse(localStorage.getItem(LS_USE)||"{}");rec=JSON.parse(localStorage.getItem(LS_REC)||"[]")}catch(e){}
+  var top=Object.keys(u).filter(function(k){return k!=="home"}).sort(function(a,b){return u[b]-u[a]}).slice(0,4);
+  if(!top.length)top=["tools","smart","aifree","services"];
+  var cont=rec.filter(function(x){return x!=="home"})[0];
+  var chip=function(rt,badge){return '<a href="#'+rt+'" style="text-decoration:none;padding:9px 13px;border-radius:999px;background:rgba(246,196,83,.12);border:1px solid rgba(246,196,83,.35);color:var(--text,#f4f7ff);font-size:13px;font-weight:700">'+routeName(rt)+(badge?' <span style="opacity:.65;font-weight:600">'+badge+'</span>':"")+'</a>'};
+  var d=document.createElement("div"); d.id="forYouCard";
+  d.innerHTML='<div class="card" style="margin-top:20px;padding:20px 22px"><b style="font-size:16px">✨ For You</b>'
+   +'<div style="color:var(--text-2,#9fb0c9);font-size:13px;margin:4px 0 12px">Based on what you use most in this workspace</div>'
+   +(cont?'<div style="margin-bottom:12px"><a class="btn btn-primary" style="text-decoration:none" href="#'+cont+'">▶ Continue: '+routeName(cont)+'</a></div>':"")
+   +'<div style="display:flex;gap:8px;flex-wrap:wrap">'+top.map(function(rt){return chip(rt,u[rt]?("×"+u[rt]):"")}).join("")+'</div></div>';
+  var anchor=$("#smartHomeCard"); if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(d,anchor); else v.appendChild(d);
+}
+document.addEventListener("DOMContentLoaded",function(){trackRoute(); setTimeout(forYou,700); aiInit()});
+setTimeout(function(){trackRoute(); forYou(); aiInit()},1600);
+
+/* ---------- 1.1 AI brain ---------- */
+var SYS="You are the AI Assistant of Polash AI OS, the website of Polash IT Solutions, run by Monjurul Islam Polash and his wife (a husband & wife team — never say he works alone). Services: web design & development, SEO, AI tools/automation, YouTube growth. Pricing: Landing page $120/page, Business website $600/5 pages, SEO $250/month. Payments: bKash/Rocket/Nagad +8801723328481, Payoneer mipolash13@gmail.com, PayPal mipolash12@gmail.com. Contact: WhatsApp https://wa.me/8801723328481, Fiverr fiverr.com/website1_1. Reply in the same language as the user (English, Bangla or Banglish). Be helpful, concise, and invite the user to start a project when relevant.";
+var chatHist=[]; try{chatHist=JSON.parse(localStorage.getItem(LS_CHAT)||"[]")}catch(e){chatHist=[]}
+function saveChat(){try{localStorage.setItem(LS_CHAT,JSON.stringify(chatHist.slice(-20)))}catch(e){}}
+function addMsg(role,text){
+  var s=$("#aimStream"); if(!s)return null;
+  var m=document.createElement("div"); m.className="aim-msg "+(role==="user"?"user":"bot"); m.textContent=text; s.appendChild(m); s.scrollTop=s.scrollHeight; return m;
+}
+function kbAnswer(q){
+  q=q.toLowerCase();
+  var has=function(){for(var i=0;i<arguments.length;i++)if(q.indexOf(arguments[i])>-1)return true;return false};
+  if(has("price","pricing","cost","charge","quote","rate","dam","খরচ","দাম"))return "Our pricing: Landing Page $120/page · Business Website $600 (5 pages) · SEO Growth $250/month. Get an instant estimate in Smart Studio (#smart) — it can send the quote straight to WhatsApp!";
+  if(has("hire","order","project","website ban","ওয়েবসাইট","অর্ডার"))return "Great! To start a project, tap 'Start a Project' on Contact, or WhatsApp us: https://wa.me/8801723328481 — Polash IT Solutions (husband & wife team) replies fast, 24/7.";
+  if(has("seo"))return "We offer full SEO: audit, keyword research, on-page fixes, content plan and monthly reports — $250/month. See Services for details, or ask me anything specific!";
+  if(has("payment","pay","bkash","বিকাশ","টাকা পাঠ"))return "We accept bKash / Rocket / Nagad: +8801723328481 · Payoneer: mipolash13@gmail.com · PayPal: mipolash12@gmail.com.";
+  if(has("contact","WhatsApp","phone","যোগাযোগ"))return "WhatsApp: https://wa.me/8801723328481 · Fiverr: fiverr.com/website1_1 · or use the Contact page. We are in Dhaka (GMT+6), available 24/7.";
+  if(has("tool"))return "Explore 610 AI tools in 18 categories on the AI Tools page, plus 20 hand-picked free tools in the Free AI Hub (#aifree). Press Ctrl+K to search anything!";
+  if(has("youtube","channel"))return "We run a 13-channel YouTube ecosystem — see the YouTube Hub for channels, and our Teaching page for courses.";
+  if(has("who","polash","about","কে"))return "Monjurul Islam Polash is a Web Developer & SEO Specialist from Bangladesh. Together with his wife, they run Polash IT Solutions — building websites, SEO and AI automation for clients worldwide.";
+  if(has("hello","hi","salam","আসসালামু","হ্যালো"))return "Hello! 👋 Ask me about our services, pricing, SEO, AI tools — or type your project idea and I will guide you. Tip: add a free Groq key from ⚙️ for full AI answers!";
+  if(has("agent"))return "You can reach the full AI Agent (Arena Agent Mode) from the golden 'AI Agent' button in the top bar — signed-in history included.";
+  return "I can help with services, pricing, SEO, AI tools, YouTube and hiring us. For full AI answers, tap ⚙️ above and add a free Groq API key — or WhatsApp us anytime: https://wa.me/8801723328481";
+}
+async function aiSend(){
+  var inp=$("#aimInput"),s=$("#aimStream"); if(!inp||!s)return;
+  var text=inp.value.trim(); if(!text)return;
+  inp.value=""; addMsg("user",text); chatHist.push({role:"user",content:text}); saveChat();
+  var key=getKey();
+  if(!key){ var r=kbAnswer(text); addMsg("bot",r); chatHist.push({role:"assistant",content:r}); saveChat(); return; }
+  var typing=addMsg("bot","✍️ Thinking…");
+  try{
+    var msgs=[{role:"system",content:SYS}].concat(chatHist.slice(-10));
+    var res=await fetch("https://api.Groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model:getModel(),messages:msgs,temperature:0.6,max_tokens:600})});
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    var data=await res.json();
+    var reply=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content||"").trim()||kbAnswer(text);
+    if(typing)typing.textContent=reply;
+    chatHist.push({role:"assistant",content:reply}); saveChat();
+  }catch(e){
+    if(typing)typing.textContent="(AI brain unreachable — offline smart answer) "+kbAnswer(text);
+    chatHist.push({role:"assistant",content:kbAnswer(text)}); saveChat();
+  }
+  s.scrollTop=s.scrollHeight;
+}
+window.paosAiSend=aiSend;
+function aiInit(){
+  var modal=$("#aiModal"),btn=$("#aimKeyBtn"),sendBtn=document.querySelector(".aim-send"),inp=$("#aimInput");
+  if(!modal||modal.dataset.p1)return; modal.dataset.p1="1";
+  // settings panel
+  var panel=document.createElement("div"); panel.id="aimKeyPanel";
+  panel.style.cssText="display:none;padding:12px 14px;border-bottom:1px solid rgba(148,163,184,.15);background:#0d1424;font-size:12.5px;color:#c7d4e8;line-height:1.6";
+  panel.innerHTML='<b style="color:#f6c453">🧠 AI Brain (free)</b> — get a free key at <span style="color:#00d4ff">console.Groq.com</span>, paste here. Stored only in your browser.<br>'
+   +'<input id="aimKeyInput" type="password" placeholder="gsk_…" style="width:100%;margin:8px 0;padding:8px 10px;border-radius:8px;background:#1a2438;border:1px solid rgba(148,163,184,.25);color:#e9eefb;outline:none">'
+   +'<select id="aimModelSel" style="width:100%;margin-bottom:8px;padding:8px 10px;border-radius:8px;background:#1a2438;border:1px solid rgba(148,163,184,.25);color:#e9eefb;outline:none"><option value="llama-3.3-70b-versatile">Llama 3.3 70B (smartest free)</option><option value="openai/gpt-oss-120b">GPT-OSS 120B</option><option value="llama-3.1-8b-instant">Llama 3.1 8B (fastest)</option></select>'
+   +'<div style="display:flex;gap:8px"><button id="aimKeySave" class="aim-send" style="padding:7px 14px">Save</button><button id="aimKeyClear" class="aim-send" style="padding:7px 14px;background:#334155;color:#e9eefb">Remove</button><span id="aimKeyStat" style="align-self:center"></span></div>';
+  var header=modal.querySelector(".aim-header"); if(header&&header.parentNode)header.parentNode.insertBefore(panel,header.nextSibling);
+  var stat=function(){$("#aimKeyStat").textContent=getKey()?"✅ Brain ON ("+getModel()+")":"⚠️ No key — smart offline mode"};
+  stat();
+  if(btn)btn.addEventListener("click",function(){panel.style.display=panel.style.display==="none"?"block":"none"; var ki=$("#aimKeyInput"); if(ki)ki.value=getKey(); var ms=$("#aimModelSel"); if(ms)ms.value=getModel();});
+  $("#aimKeySave").addEventListener("click",function(){var v=$("#aimKeyInput").value.trim(); try{if(v)localStorage.setItem(LS_KEY,v); localStorage.setItem(LS_MODEL,$("#aimModelSel").value)}catch(e){} stat(); addMsg("bot","🧠 AI brain connected! Now ask me anything.");});
+  $("#aimKeyClear").addEventListener("click",function(){try{localStorage.removeItem(LS_KEY)}catch(e){} $("#aimKeyInput").value=""; stat();});
+  // rewire send
+  if(sendBtn){sendBtn.removeAttribute("onclick"); sendBtn.addEventListener("click",aiSend);}
+  if(inp){inp.removeAttribute("onkeydown"); inp.addEventListener("keydown",function(e){if(e.key==="Enter")aiSend()});}
+  // restore history
+  var s=$("#aimStream");
+  if(s&&chatHist.length){s.innerHTML=""; chatHist.slice(-12).forEach(function(m){addMsg(m.role==="user"?"user":"bot",m.content)});}
+  else if(s){addMsg("bot","Tip: tap ⚙️ and add a free Groq key to unlock my full AI brain 🧠");}
+}
+})();
+</script>
+
 </body>
 
 </html>
