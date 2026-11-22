@@ -4417,7 +4417,7 @@
                     <span data-icon-btn="search"></span><span data-i18n="searchAll">Search tools, pages, channels…</span><span class="kbd">⌘K</span>
                 </button>
                 <div class="top-actions">
-                    <button class="icon-btn hide-sm" onclick="openQuickLaunch()" aria-label="Quick launch" data-icon-btn="bolt"></button>
+                    <button class="icon-btn" onclick="openQuickLaunch()" aria-label="Quick launch" data-icon-btn="bolt"></button>
                     <button class="icon-btn" onclick="openGpt()" aria-label="Open POLASH GPT assistant" title="POLASH GPT — AI assistant (Ctrl+J)" id="gptBtn"><span data-icon-btn="spark"></span></button>
                     <button class="icon-btn" id="termBtn" onclick="toggleAgentTerm()" title="Agent terminal (Ctrl+`)"><span data-icon-btn="code"></span></button>
                     <button class="icon-btn lang-btn" onclick="toggleLang()" aria-label="Toggle language" id="langBtn">EN</button>
@@ -4709,6 +4709,8 @@
                     automation: "AI Automation Hub",
                     aifree: "Free AI Hub",
                     aifreeSub: "Free AI tools & agents · live list",
+                    smart: "Smart Studio",
+                    smartSub: "Kanban · Pomodoro · Quote calculator",
                     automationSub: "SEO audit · code-gen · video pipelines",
                     quickActions: "Quick Actions",
                     todayFocus: "Today's Focus",
@@ -4765,6 +4767,8 @@
                     automation: "এআই অটোমেশন হাব",
                     aifree: "ফ্রি AI হাব",
                     aifreeSub: "ফ্রি AI টুল ও এজেন্ট · লাইভ তালিকা",
+                    smart: "স্মার্ট স্টুডিও",
+                    smartSub: "কানবান · পোমোডোরো · কোট ক্যালকুলেটর",
                     automationSub: "এসইও · কোড-জেন · ভিডিও অটোমেশন",
                     quickActions: "দ্রুত কাজ",
                     todayFocus: "আজকের ফোকাস",
@@ -6816,6 +6820,10 @@
                     r: "automation",
                     i: "bolt",
                     badge: "AI"
+                }, {
+                    r: "smart",
+                    i: "spark",
+                    badge: "NEW"
                 }, {
                     r: "aifree",
                     i: "spark",
