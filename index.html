@@ -13029,7 +13029,7 @@ var LS_KEY="paos_Groq_key", LS_MODEL="paos_Groq_model", LS_CHAT="paos_ai_chat_v1
 function $(s){return document.querySelector(s)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function getKey(){try{return localStorage.getItem(LS_KEY)||""}catch(e){return""}}
-function getModel(){try{return localStorage.getItem(LS_MODEL)||"llama-3.3-70b-versatile"}catch(e){return"llama-3.3-70b-versatile"}}
+function getModel(){var ok=["qwen/qwen3.8-27b","openai/gpt-oss-120b","openai/gpt-oss-20b"];try{var m=localStorage.getItem(LS_MODEL)||"";return ok.indexOf(m)>-1?m:ok[0]}catch(e){return ok[0]}}
 
 /* ---------- route usage tracking (1.2 + 1.3 data) ---------- */
 function trackRoute(){
@@ -13094,7 +13094,7 @@ async function aiSend(){
   var typing=addMsg("bot","✍️ Thinking…");
   try{
     var msgs=[{role:"system",content:SYS}].concat(chatHist.slice(-10));
-    var res=await fetch("https://api.Groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model:getModel(),messages:msgs,temperature:0.6,max_tokens:600})});
+    var res=await fetch("https://api.Groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model:getModel(),messages:msgs,temperature:0.6,max_tokens:900})});
     if(!res.ok)throw new Error("HTTP "+res.status);
     var data=await res.json();
     var reply=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content||"").trim()||kbAnswer(text);
@@ -13115,7 +13115,7 @@ function aiInit(){
   panel.style.cssText="display:none;padding:12px 14px;border-bottom:1px solid rgba(148,163,184,.15);background:#0d1424;font-size:12.5px;color:#c7d4e8;line-height:1.6";
   panel.innerHTML='<b style="color:#f6c453">🧠 AI Brain (free)</b> — get a free key at <span style="color:#00d4ff">console.Groq.com</span>, paste here. Stored only in your browser.<br>'
    +'<input id="aimKeyInput" type="password" placeholder="gsk_…" style="width:100%;margin:8px 0;padding:8px 10px;border-radius:8px;background:#1a2438;border:1px solid rgba(148,163,184,.25);color:#e9eefb;outline:none">'
-   +'<select id="aimModelSel" style="width:100%;margin-bottom:8px;padding:8px 10px;border-radius:8px;background:#1a2438;border:1px solid rgba(148,163,184,.25);color:#e9eefb;outline:none"><option value="llama-3.3-70b-versatile">Llama 3.3 70B (smartest free)</option><option value="openai/gpt-oss-120b">GPT-OSS 120B</option><option value="llama-3.1-8b-instant">Llama 3.1 8B (fastest)</option></select>'
+   +'<select id="aimModelSel" style="width:100%;margin-bottom:8px;padding:8px 10px;border-radius:8px;background:#1a2438;border:1px solid rgba(148,163,184,.25);color:#e9eefb;outline:none"><option value="qwen/qwen3.8-27b">Qwen 3.8 27B (fast + smart)</option><option value="openai/gpt-oss-120b">GPT-OSS 120B (deepest)</option><option value="openai/gpt-oss-20b">GPT-OSS 20B (light)</option></select>'
    +'<div style="display:flex;gap:8px"><button id="aimKeySave" class="aim-send" style="padding:7px 14px">Save</button><button id="aimKeyClear" class="aim-send" style="padding:7px 14px;background:#334155;color:#e9eefb">Remove</button><span id="aimKeyStat" style="align-self:center"></span></div>';
   var header=modal.querySelector(".aim-header"); if(header&&header.parentNode)header.parentNode.insertBefore(panel,header.nextSibling);
   var stat=function(){$("#aimKeyStat").textContent=getKey()?"✅ Brain ON ("+getModel()+")":"⚠️ No key — smart offline mode"};
