@@ -1,5 +1,5 @@
 ﻿/* Polash AI OS â€” Service Worker (offline support) */
-const CACHE = 'polash-ai-os-v16';
+const CACHE = 'polash-ai-os-v17';
 const CORE = [
   './',
   './index.html',
