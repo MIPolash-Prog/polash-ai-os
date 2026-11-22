@@ -11192,6 +11192,12 @@
         .agent-term.open {
             transform: translateY(0);
         }
+.at-input{flex:1;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.25);border-radius:8px;color:#eaf6ff;padding:8px 10px;font:12px/1 'JetBrains Mono',Consolas,monospace;outline:none;min-width:0}
+.at-input:focus{border-color:#f6c453;box-shadow:0 0 0 2px rgba(246,196,83,.25)}
+.at-run{color:#0b1020!important;background:linear-gradient(135deg,#f6c453,#00d4ff);font-weight:900;border:none;cursor:pointer}
+#termBtn{position:relative}
+#termBtn::after{content:"";position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;animation:atBlink 1.6s infinite}
+@keyframes atBlink{50%{opacity:.35}}
 
         .agent-term .agent-term-body {
             height: 250px;
@@ -11611,7 +11617,7 @@
             <button class="at-btn" onclick="toggleAgentTerm()" title="Close (Ctrl+`)">&#10005;</button>
         </div>
         <div class="agent-term-body" id="agentTermBody"></div>
-        <div class="agent-term-foot"><span class="at-prompt">polash@ai-os:~$</span><span class="at-caret"></span></div>
+        <div class="agent-term-foot"><span class="at-prompt">polash@ai-os:~$</span><input id="agentTermInput" class="at-input" type="text" placeholder="Type a command… try: help" autocomplete="off" spellcheck="false" aria-label="Agent terminal command input"><button class="at-btn at-run" onclick="runAgentTermInput()">RUN &#9654;</button></div>
     </div>
     <script id="agency-runtime">
         (function() {
@@ -11635,8 +11641,76 @@
             };
             window.toggleAgentTerm = function() {
                 var t = document.getElementById("agentTerm");
-                if (t) t.classList.toggle("open")
+                if (!t) return;
+                t.classList.toggle("open");
+                if (t.classList.contains("open")) {
+                    window.agentLog("terminal ACTIVE \u2014 type 'help' and press Enter", "ok");
+                    var inp = document.getElementById("agentTermInput");
+                    if (inp) setTimeout(function(){ inp.focus(); }, 80);
+                }
             };
+            var cmdHistory = [], cmdHistIdx = -1;
+            function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+            window.runAgentCommand = function(raw) {
+                var cmd = (raw || "").trim();
+                if (!cmd) return;
+                cmdHistory.push(cmd); cmdHistIdx = cmdHistory.length;
+                window.agentLog("polash@ai-os:~$ " + escHtml(cmd), "cmd");
+                var parts = cmd.split(/\s+/), c = parts[0].toLowerCase(), arg = parts.slice(1).join(" ");
+                var pages = ["home","dashboard","tools","workspace","youtube","teaching","learning","playbook","automation","smart","aifree","career","portfolio","blog","settings","about","contact","services"];
+                try {
+                    if (c === "help") {
+                        window.agentLog("commands: help \u00b7 status \u00b7 pages \u00b7 open &lt;page&gt; \u00b7 search &lt;text&gt; \u00b7 tools \u00b7 theme \u00b7 lang \u00b7 agent \u00b7 WhatsApp \u00b7 time \u00b7 whoami \u00b7 clear", "cyan");
+                        window.agentLog("examples:  open smart   |   search video   |   open services", "dim");
+                    } else if (c === "status") {
+                        window.agentLog("status: ALL SYSTEMS GREEN \u2014 610 tools \u00b7 21 pages \u00b7 EN/BN \u00b7 PWA ready", "ok");
+                    } else if (c === "pages") {
+                        window.agentLog("pages: " + pages.join(" \u00b7 "), "info");
+                    } else if (c === "open") {
+                        var pg = (arg || "home").toLowerCase().replace("#","");
+                        if (pages.indexOf(pg) < 0) { window.agentLog("unknown page '" + escHtml(pg) + "' \u2014 type 'pages'", "warn"); }
+                        else { window.agentLog("opening #" + pg + " \u2026", "ok"); if (typeof go === "function") go(pg); else location.hash = "#" + pg; }
+                    } else if (c === "search") {
+                        if (!arg) window.agentLog("usage: search &lt;text&gt;", "warn");
+                        else if (typeof openPalette === "function") { openPalette(); window.agentLog("universal search opened \u2014 type: " + escHtml(arg), "ok"); }
+                        else window.agentLog("search unavailable", "warn");
+                    } else if (c === "tools") {
+                        window.agentLog("index: 610 tools in 18 categories \u2014 type 'open tools'", "info");
+                    } else if (c === "theme") {
+                        if (typeof toggleTheme === "function") { toggleTheme(); window.agentLog("theme toggled", "ok"); } else window.agentLog("theme fn unavailable", "warn");
+                    } else if (c === "lang") {
+                        if (typeof toggleLang === "function") { toggleLang(); window.agentLog("language toggled EN/BN", "ok"); } else window.agentLog("lang fn unavailable", "warn");
+                    } else if (c === "agent") {
+                        window.open("https://arena.ai/agent", "_blank"); window.agentLog("Arena AI Agent Mode opened in new tab", "ok");
+                    } else if (c === "WhatsApp") {
+                        window.open("https://wa.me/8801723328481", "_blank"); window.agentLog("WhatsApp opened", "ok");
+                    } else if (c === "time" || c === "date") {
+                        window.agentLog(new Date().toString(), "info");
+                    } else if (c === "whoami") {
+                        window.agentLog("Monjurul Islam Polash \u2014 Polash IT Solutions \u00b7 husband & wife team \u00b7 Dhaka, GMT+6", "gold");
+                    } else if (c === "clear" || c === "clr") {
+                        window.clearAgentTerm();
+                    } else {
+                        window.agentLog("unknown command '" + escHtml(c) + "' \u2014 type 'help'", "warn");
+                    }
+                } catch (err) { window.agentLog("error: " + escHtml(err.message || err), "warn"); }
+            };
+            window.runAgentTermInput = function() {
+                var inp = document.getElementById("agentTermInput");
+                if (!inp) return;
+                window.runAgentCommand(inp.value);
+                inp.value = "";
+                inp.focus();
+            };
+            document.addEventListener("DOMContentLoaded", function() {
+                var inp = document.getElementById("agentTermInput");
+                if (!inp) return;
+                inp.addEventListener("keydown", function(e) {
+                    if (e.key === "Enter") { e.preventDefault(); window.runAgentTermInput(); }
+                    else if (e.key === "ArrowUp") { e.preventDefault(); if (cmdHistIdx > 0) { cmdHistIdx--; inp.value = cmdHistory[cmdHistIdx] || ""; } }
+                    else if (e.key === "ArrowDown") { e.preventDefault(); if (cmdHistIdx < cmdHistory.length) { cmdHistIdx++; inp.value = cmdHistory[cmdHistIdx] || ""; } }
+                });
+            });
             window.clearAgentTerm = function() {
                 termLines = [];
                 window.agentLog("terminal cleared", "dim")
@@ -11659,7 +11733,8 @@
                 ["aider/aether pipeline: connected (local)", "info"],
                 ["fiverr bridge: profile @website1_1 linked", "info"],
                 ["payments: BK/RO/NA/PY/PP verified", "info"],
-                ["all systems green — ready for orders", "ok"]
+                ["all systems green — ready for orders", "ok"],
+                ["terminal interactive \u2014 press Ctrl+` or tap the code button, type help", "cyan"]
             ];
             var bi = 0;
             var bootTimer = setInterval(function() {
