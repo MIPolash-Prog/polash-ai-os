@@ -13477,6 +13477,40 @@ setTimeout(onRoute,1700);
 .hero-cta .kbd,.cmd-chip .kbd{display:none}
 }
 </style>
+<script id="four-ways">
+/* ===== BUILD · LEARN · EARN · GROW — whole site in 4 gateways ===== */
+(function(){
+"use strict";
+function $(s){return document.querySelector(s)}
+var WAYS=[
+ {k:"BUILD",icon:"🛠️",color:"#f6c453",desc:"Websites, apps, tools & automation — we build it",links:[["tools","🧰 AI Tools"],["workspace","🗂️ Workspace"],["smart","⚡ Smart Studio"],["automation","🤖 Automation"],["services","💼 Services"],["portfolio","🖼️ Portfolio"]]},
+ {k:"LEARN",icon:"📚",color:"#00d4ff",desc:"Courses, teaching, knowledge vault & free AI",links:[["learning","📖 Learning"],["teaching","🎓 Teaching"],["playbook","📘 Knowledge Vault"],["aifree","🆓 Free AI Hub"],["blog","📝 Insights / Blog"],["youtube","▶️ YouTube Hub"]]},
+ {k:"EARN",icon:"💰",color:"#22c55e",desc:"Freelancing, clients, quotes & getting paid",links:[["career","💼 Career & Freelance"],["services","💲 Pricing & Services"],["smart","🎯 Lead Tracker"],["contact","🚀 Start a Project"],["portfolio","🖼️ Portfolio"],["dashboard","📊 Dashboard"]]},
+ {k:"GROW",icon:"📈",color:"#c084fc",desc:"YouTube, SEO, content & business growth",links:[["youtube","▶️ YouTube Hub"],["automation","🔍 SEO Automation"],["blog","📝 Insights"],["smart","✍️ Content Planner"],["dashboard","📊 Dashboard"],["aifree","🆓 Free AI Hub"]]}
+];
+function build(){
+  var r=((location.hash||"#home").slice(1).split("?")[0].split("/")[0]||"home");
+  if(r!=="home")return;
+  var v=$("#view"); if(!v||$("#fourWays"))return;
+  var d=document.createElement("div"); d.id="fourWays";
+  d.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;margin-top:20px">'
+   +WAYS.map(function(w){
+      return '<div class="card" style="padding:20px;border-top:3px solid '+w.color+'">'
+      +'<a href="#'+w.links[0][0]+'" style="text-decoration:none;display:block"><div style="font-size:26px">'+w.icon+'</div>'
+      +'<div style="font-size:21px;font-weight:900;letter-spacing:.08em;color:'+w.color+';margin:6px 0 4px">'+w.k+'</div>'
+      +'<div style="color:var(--text-2,#9fb0c9);font-size:12.5px;line-height:1.55;min-height:38px">'+w.desc+'</div></a>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">'
+      +w.links.map(function(l){return '<a href="#'+l[0]+'" style="text-decoration:none;font-size:12px;font-weight:700;padding:6px 10px;border-radius:999px;background:rgba(148,163,184,.09);border:1px solid rgba(148,163,184,.2);color:var(--text,#f4f7ff)">'+l[1]+'</a>'}).join("")
+      +'</div></div>'}).join("")+'</div>';
+  var anchor=$("#forYouCard")||$("#smartHomeCard");
+  if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(d,anchor); else v.appendChild(d);
+}
+window.addEventListener("hashchange",function(){setTimeout(build,420)});
+document.addEventListener("DOMContentLoaded",function(){setTimeout(build,650)});
+setTimeout(build,1500);
+})();
+</script>
+
 </body>
 
 </html>
