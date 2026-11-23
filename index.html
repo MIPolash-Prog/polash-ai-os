@@ -13385,7 +13385,16 @@ window.seoAuditCopy=function(){ if(!lastSeoReport){window.seoAudit()} if(!lastSe
 
 /* ---------- 4.3 A/B hero test ---------- */
 var ABV_KEY="paos_ab_variant";
-function abVariant(){try{var v=localStorage.getItem(ABV_KEY); if(v!=="A"&&v!=="B"){v=Math.random()<0.5?"A":"B"; localStorage.setItem(ABV_KEY,v)} return v}catch(e){return"A"}}
+function abWinner(){
+  var views=jget("paos_ab_views",{}), clicks=jget("paos_ab_clicks",{});
+  try{var locked=localStorage.getItem("paos_ab_winner"); if(locked==="A"||locked==="B")return locked}catch(e){}
+  if((views.A||0)>=30&&(views.B||0)>=30){
+    var ca=(clicks.A||0)/views.A, cb=(clicks.B||0)/views.B;
+    if(Math.abs(ca-cb)>=0.02){ var win=cb>ca?"B":"A"; try{localStorage.setItem("paos_ab_winner",win)}catch(e){} return win }
+  }
+  return null;
+}
+function abVariant(){ var win=abWinner(); if(win)return win; try{var v=localStorage.getItem(ABV_KEY); if(v!=="A"&&v!=="B"){v=Math.random()<0.5?"A":"B"; localStorage.setItem(ABV_KEY,v)} return v}catch(e){return"A"}}
 function abApply(){
   var r=((location.hash||"#home").slice(1).split("?")[0].split("/")[0]||"home"); if(r!=="home")return;
   var v=abVariant();
@@ -13424,7 +13433,7 @@ window.p4Render=function(){
    +'<div style="flex:1;min-width:120px;padding:12px;border-radius:12px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3)"><div style="font-size:22px;font-weight:900;color:#22c55e">'+leads.length+'</div><div style="font-size:12px;color:var(--text-2,#9fb0c9)">Leads · $'+pipe+' pipeline</div></div></div>'
    +'<b>🏆 Top pages</b><div style="margin:8px 0 14px">'+(topPages.map(function(k){return bar("📌 "+k,usage[k],maxP)}).join("")||"No data yet — browse a few pages!")+'</div>'
    +'<b>🔎 Top searches / picks</b><div style="margin:8px 0 14px">'+(topPal.map(function(k){return bar(k,pal[k],maxT)}).join("")||"No palette data yet — press Ctrl+K and pick something!")+'</div>'
-   +'<b>🧪 A/B Hero Test</b><div style="margin-top:8px;font-size:13px">Variant A (original): '+ (views.A||0) +' views · '+(clicks.A||0)+' CTA clicks · CTR '+ctr("A")+'<br>Variant B (benefit-first): '+(views.B||0)+' views · '+(clicks.B||0)+' CTA clicks · CTR '+ctr("B")+'<br><span style="color:var(--text-2,#9fb0c9)">Your variant: <b>'+abVariant()+'</b> — the higher CTR wins; we keep the winner as default.</span></div>';
+   +'<b>🧪 A/B Hero Test</b><div style="margin-top:8px;font-size:13px">Variant A (original): '+ (views.A||0) +' views · '+(clicks.A||0)+' CTA clicks · CTR '+ctr("A")+'<br>Variant B (benefit-first): '+(views.B||0)+' views · '+(clicks.B||0)+' CTA clicks · CTR '+ctr("B")+'<br><span style="color:var(--text-2,#9fb0c9)">Your variant: <b>'+abVariant()+'</b>'+(abWinner()?(' · 🏆 <b style="color:var(--gold,#f6c453)">Winner locked: Variant '+abWinner()+'</b> — now shown to everyone'):' — needs 30+ views each &amp; 2% CTR gap to lock a winner automatically')+'</span></div>';
 };
 function onRoute(){ setTimeout(abApply,500); setTimeout(window.p4Render,700); }
 window.addEventListener("hashchange",onRoute);
