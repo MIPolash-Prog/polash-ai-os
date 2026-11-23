@@ -13560,16 +13560,20 @@ window.tagWay=function(i){
 (function(){
 "use strict";
 function $(s){return document.querySelector(s)}
-var APPS=[
- {n:"Gmail",icon:"📧",url:"https://mail.google.com",c:"#ea4335",d:"Mail inbox"},
- {n:"Google Drive",icon:"🗂️",url:"https://drive.google.com",c:"#f6c453",d:"Files & folders"},
- {n:"Google Docs",icon:"📄",url:"https://docs.google.com",c:"#00d4ff",d:"Documents"},
- {n:"Dropbox",icon:"📦",url:"https://www.dropbox.com/home",c:"#60a5fa",d:"Cloud storage"},
- {n:"OneDrive",icon:"☁️",url:"https://onedrive.live.com",c:"#38bdf8",d:"Microsoft cloud"},
- {n:"Playbook Drive",icon:"📘",url:"https://www.playbook.com/organizations",c:"#c084fc",d:"100GB creative storage"},
- {n:"Tech Center Drive",icon:"📺",url:"https://drive.google.com",c:"#f6c453",d:"Polash@tech-center.com (YouTube)"},
- {n:"Outlook",icon:"📬",url:"https://outlook.live.com/mail/",c:"#4f8ff7",d:"Microsoft mail"},
- {n:"Email লিখুন",icon:"✉️",url:"mailto:",c:"#22c55e",d:"Write new email",internal:true}
+var GROUPS=[
+ {h:"📧 যোগাযোগ (Mail)",items:[
+  {n:"Gmail",icon:"📧",url:"https://mail.google.com",c:"#ea4335",d:"mipolash13@gmail.com"},
+  {n:"Outlook",icon:"📬",url:"https://outlook.live.com/mail/",c:"#4f8ff7",d:"Microsoft mail"},
+  {n:"Email লিখুন",icon:"✉️",url:"mailto:",c:"#22c55e",d:"New email compose",internal:true}]},
+ {h:"💾 ড্রাইভ ও স্টোরেজ (কোনটায় কী রাখবেন)",items:[
+  {n:"Playbook Drive",icon:"📘",url:"https://www.playbook.com/organizations",c:"#c084fc",d:"100GB · ভিডিও/ডিজাইন/পোর্টফোলিও"},
+  {n:"Google Drive",icon:"🗂️",url:"https://drive.google.com",c:"#f6c453",d:"15GB · ডকুমেন্ট/Sheets/n8n"},
+  {n:"OneDrive",icon:"☁️",url:"https://onedrive.live.com",c:"#38bdf8",d:"5GB · ব্যাকআপ"},
+  {n:"Dropbox",icon:"📦",url:"https://www.dropbox.com/home",c:"#60a5fa",d:"2GB · ফাইল পাঠানো"}]},
+ {h:"🛠️ কাজের টুল",items:[
+  {n:"Google Docs",icon:"📄",url:"https://docs.google.com",c:"#00d4ff",d:"Documents"},
+  {n:"Tech Center Drive",icon:"📺",url:"https://drive.google.com",c:"#f6c453",d:"YouTube · Polash@tech-center.com"},
+  {n:"Knowledge Vault",icon:"🧠",url:"#playbook",c:"#22c55e",d:"নোট/প্রম্পট/সার্টিফিকেট",internal:true}]}
 ];
 function build(){
   var r=((location.hash||"#home").slice(1).split("?")[0].split("/")[0]||"home");
@@ -13578,9 +13582,9 @@ function build(){
   var d=document.createElement("div"); d.id="myApps";
   d.innerHTML='<div class="card" style="margin-top:20px;padding:20px 22px"><b style="font-size:16.5px">🔗 My Connected Apps</b>'
    +'<div style="color:var(--text-2,#9fb0c9);font-size:13px;margin:4px 0 14px">One click opens each app in a new tab — signed in with your Google / Dropbox account in this browser.</div>'
-   +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">'
-   +APPS.map(function(a){return '<a href="'+a.url+'" '+(a.internal?'':'target="_blank" rel="noopener"')+' style="text-decoration:none;display:flex;align-items:center;gap:11px;padding:14px;border-radius:14px;background:rgba(148,163,184,.07);border:1px solid '+a.c+'55;border-top:3px solid '+a.c+';color:var(--text,#f4f7ff)"><span style="font-size:25px">'+a.icon+'</span><span><b style="font-size:14.5px;display:block">'+a.n+'</b><span style="font-size:12px;color:var(--text-2,#9fb0c9)">'+a.d+'</span></span></a>'}).join("")
-   +'</div></div>';
+   +GROUPS.map(function(g){return '<div style="font-size:13px;font-weight:800;color:var(--text-2,#9fb0c9);margin:14px 0 8px">'+g.h+'</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">'
+   +g.items.map(function(a){return '<a href="'+a.url+'" '+(a.internal?'':'target="_blank" rel="noopener"')+' style="text-decoration:none;display:flex;align-items:center;gap:11px;padding:14px;border-radius:14px;background:rgba(148,163,184,.07);border:1px solid '+a.c+'55;border-top:3px solid '+a.c+';color:var(--text,#f4f7ff)"><span style="font-size:25px">'+a.icon+'</span><span><b style="font-size:14.5px;display:block">'+a.n+'</b><span style="font-size:12px;color:var(--text-2,#9fb0c9)">'+a.d+'</span></span></a>'}).join("")+'</div>'}).join("")
+   +'</div>';
   var hero=v.querySelector(".home-glow")||v.firstElementChild;
   if(hero&&hero.parentNode)hero.parentNode.insertBefore(d,hero.nextSibling); else v.appendChild(d);
 }
