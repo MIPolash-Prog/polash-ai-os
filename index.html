@@ -13311,7 +13311,7 @@ window.wtCopy=function(){var t=wtText(); if(navigator.clipboard&&navigator.clipb
 
 /* ---------- 3.1 n8n Bridge ---------- */
 var N8N_KEY="paos_n8n_webhook";
-function n8nHook(){try{return localStorage.getItem(N8N_KEY)||""}catch(e){return""}}
+function n8nHook(){try{ return localStorage.getItem(N8N_KEY)||"https://polash1324.app.n8n.cloud/webhook/polash-leads"}catch(e){return""}}
 window.n8nSave=function(){var u=(($("#n8nUrl")||{}).value||"").trim(); try{localStorage.setItem(N8N_KEY,u)}catch(e){} n8nStat(u?"✅ Webhook saved — new leads will auto-send here.":"Webhook cleared.");};
 function n8nStat(m){var s=$("#n8nStat"); if(s)s.textContent=m}
 window.n8nSend=async function(payload){
