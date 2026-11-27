@@ -13332,8 +13332,7 @@ function n8nInit(){
   // hook lead creation -> webhook
   if(typeof window.ldAdd==="function"&&!window.ldAdd._p3){
     var orig=window.ldAdd;
-   var wrapped=function(name,contact,need,value){var nm=name||(($(\"#ldName\")||{}).value||""),ct=contact||(($(\"#ldContact\")||{}).value||""),nd=need||"Website project",vl=(value!=null&&value!=="")?value:(($(\"#ldValue\")||{}).value||""); orig(name,contact,need,value); window.n8nSend({event:"new_lead",name:(nm||"").trim()||"lead",contact:ct,need:nd,value:vl,ts:new Date().toISOString(),source:"polash-ai-os"});};
-  }
+var wrapped=function(name,contact,need,value){var nm=name||(($("#ldName")||{}).value||""),ct=contact||(($("#ldContact")||{}).value||""),nd=need||"Website project",vl=(value!=null&&value!=="")?value:(($("#ldValue")||{}).value||""); orig(name,contact,need,value); window.n8nSend({event:"new_lead",name:(nm||"").trim()||"lead",contact:ct,need:nd,value:vl,ts:new Date().toISOString(),source:"polash-ai-os"});};
 }
 function onRoute(){ if($("#leadBoard")||$("#cpOut")||$("#n8nUrl")){ setTimeout(n8nInit,60); if(window.ldRender)window.ldRender(); } }
 window.addEventListener("hashchange",function(){setTimeout(onRoute,150)});
